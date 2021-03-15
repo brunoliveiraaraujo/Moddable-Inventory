@@ -5,6 +5,7 @@ using System;
 using System.Collections.ObjectModel;
 using IniParser;
 using IniParser.Model;
+using System.Linq;
 
 namespace ModdableInventory
 {
@@ -33,33 +34,47 @@ namespace ModdableInventory
             onLoaded?.Invoke();
         }
 
-        private List<ItemCategory> ParseDatabase(FileIniDataParser parser, IniData data)
+        public List<ItemCategory> ParseDatabase(FileIniDataParser parser, IniData data)
         {
             List<ItemCategory> database = new List<ItemCategory>();
             Dictionary<string, string> itemName_TypeName = new Dictionary<string, string>();
             Dictionary<string, Item> itemName_Item = new Dictionary<string, Item>();
-
+            
             // read types sections
             foreach (SectionData section in data.Sections)
             {
                 if (section.SectionName.EndsWith("Types"))
                 {
                     string typeName = section.SectionName.Replace("Types", "");
-                    Type itemType = Type.GetType(typeName);
-
                     string categoryName = section.Keys["categoryName"];
+                    Type itemType = Type.GetType(typeName);
+                    Dictionary<int, string> itemID_itemName = new Dictionary<int, string>();
 
                     database.Add(new ItemCategory(typeName, categoryName, new List<ItemSlot>()));
 
-                    for (int i = 0 ; i < section.Keys.Count - 1; i++)
+                    foreach (var key in section.Keys)
                     {
-                        var keyValue = section.Keys[i.ToString()];
-                        itemName_TypeName.Add(keyValue, typeName);
+                        if (!key.KeyName.Equals("categoryName"))
+                        {
+                            int itemID = int.Parse(key.KeyName);
+
+                            itemID_itemName.Add(itemID, key.Value);
+
+                            if (itemID < 0) 
+                            {
+                                throw new ArgumentOutOfRangeException(
+                                    $"index of \"{key.Value}\"", "cannot be negative");
+                            }
+                        }
+                    }
+                    foreach (var orderedItems in itemID_itemName.OrderBy(key => key.Key))
+                    {
+                        itemName_TypeName.Add(orderedItems.Value, typeName);
                     }
                 }
             }
 
-            // read items sections
+            // read item sections
             foreach (SectionData section in data.Sections)
             {
                 foreach (KeyValuePair<string, string> nameEntry in itemName_TypeName)

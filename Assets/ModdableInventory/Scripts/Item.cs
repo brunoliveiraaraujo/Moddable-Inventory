@@ -31,9 +31,9 @@ namespace ModdableInventory
             MultiStack = SetProperty<bool>("multiStack", true);
 
             if (Cost < 0) 
-                throw new ArgumentOutOfRangeException("cost", "cannot be negative");
+                throw new ArgumentOutOfRangeException($"cost of \"{Name}\"", "cannot be negative");
             if (StackLimit < 0) 
-                throw new ArgumentOutOfRangeException("stackLimit", "cannot be negative");
+                throw new ArgumentOutOfRangeException($"stackLimit of \"{Name}\"", "cannot be negative");
         }
 
         public virtual void LogItem(int decimalPlaces)
@@ -83,7 +83,7 @@ namespace ModdableInventory
             {
                 property = defaultValue;
             }
-            
+
             return property;
         }
     }

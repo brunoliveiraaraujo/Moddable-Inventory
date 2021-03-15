@@ -7,13 +7,13 @@ using Utils;
 
 namespace ModdableInventory
 {
-    [RequireComponent(typeof(ItemDatabaseLoader))]
+    [RequireComponent(typeof(ItemDatabase))]
     public class Inventory : MonoBehaviour
     {        
         [SerializeField] private bool limitedByWeight = false;
         [Min(0)][SerializeField] private float weightCapacity;
 
-        private ItemDatabaseLoader database;
+        private ItemDatabase database;
         private List<ItemCategory> inventory = new List<ItemCategory>();
         private float inventoryWeight = 0;
         private InventorySorter sorter;
@@ -30,7 +30,7 @@ namespace ModdableInventory
 
         private void Awake() 
         {
-            database = GetComponent<ItemDatabaseLoader>();
+            database = GetComponent<ItemDatabase>();
             sorter = new InventorySorter(inventory);
 
             database.onLoaded += InitializeInventory;

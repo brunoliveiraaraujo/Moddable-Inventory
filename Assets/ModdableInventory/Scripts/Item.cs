@@ -6,7 +6,7 @@ using Utils;
 
 namespace ModdableInventory
 {
-    public abstract class Item
+    public class Item
     {
         public string Name { get; private set; }
         public int Cost { get; private set; }
@@ -14,7 +14,7 @@ namespace ModdableInventory
         public int StackLimit { get; private set; }
         public bool MultiStack { get; private set; }
 
-        Dictionary<string, string> itemData;
+        private Dictionary<string, string> itemData;
 
         public virtual void Initialize(Dictionary<string, string> itemData)
         {
@@ -25,6 +25,11 @@ namespace ModdableInventory
             Weight = SetProperty<float>("weight", 0);
             StackLimit = SetProperty<int>("stackLimit", 99);
             MultiStack = SetProperty<bool>("multiStack", true);
+
+            if (Cost < 0) 
+                throw new ArgumentOutOfRangeException("cost", "cannot be negative");
+            if (StackLimit < 0) 
+                throw new ArgumentOutOfRangeException("stackLimit", "cannot be negative");
         }
 
         public virtual void LogItem(int decimalPlaces)
@@ -40,8 +45,14 @@ namespace ModdableInventory
         {
             string property;
 
-            try { property = itemData[key]; }
-            catch { property = defaultValue;}
+            if (itemData.ContainsKey(key))
+            {
+                property = itemData[key];
+            }
+            else
+            {
+                property = defaultValue;
+            }
 
             return property;
         }
@@ -50,12 +61,32 @@ namespace ModdableInventory
         {
             T property;
 
-            try 
-            { 
-                property = (T)Convert.ChangeType(
-                itemData[key], typeof(T), CultureInfo.InvariantCulture); 
+            if (itemData.ContainsKey(key))
+            {
+                try
+                {
+                    property = (T) Convert.ChangeType(
+                    itemData[key], typeof(T), CultureInfo.InvariantCulture);
+                }
+                catch
+                {
+                    throw new FormatException(
+                        $"value in key \"{key}\" of \"{Name}\"" 
+                        + $" is not of type \"{typeof(T)}\""); 
+                }
             }
-            catch { property = defaultValue; }
+            else
+            {
+                property = defaultValue;
+            }
+
+            // try 
+            // { 
+            //     property = (T)Convert.ChangeType(
+            //     itemData[key], typeof(T), CultureInfo.InvariantCulture); 
+            // }
+            // catch { property = defaultValue; }
+
             return property;
         }
     }

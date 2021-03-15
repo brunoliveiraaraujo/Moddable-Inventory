@@ -8,7 +8,7 @@ using IniParser.Model;
 
 namespace ModdableInventory
 {
-    public class ItemDatabaseLoader : MonoBehaviour
+    public class ItemDatabase : MonoBehaviour
     {
         private const string ITEMS_NAMESPACE = "ModdableInventory.Items";
 

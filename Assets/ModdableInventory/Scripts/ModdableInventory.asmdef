@@ -1,0 +1,16 @@
+{
+    "name": "ModdableInventory",
+    "rootNamespace": "",
+    "references": [
+        "GUID:89201632ca231734191a4a479a969c24"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

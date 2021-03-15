@@ -8,17 +8,21 @@ namespace ModdableInventory
 {
     public class Item
     {
+        private Dictionary<string, string> itemData;
+
         public string Name { get; private set; }
         public int Cost { get; private set; }
         public float Weight { get; private set; }
         public int StackLimit { get; private set; }
         public bool MultiStack { get; private set; }
-
-        private Dictionary<string, string> itemData;
+        public Dictionary<string, string> ItemData 
+        { 
+            get => itemData; private set => itemData = value; 
+        }
 
         public virtual void Initialize(Dictionary<string, string> itemData)
         {
-            this.itemData = itemData;
+            this.ItemData = itemData;
 
             Name = SetProperty("name", "generic_item");
             Cost = SetProperty<int>("cost", 0);
@@ -45,9 +49,9 @@ namespace ModdableInventory
         {
             string property;
 
-            if (itemData.ContainsKey(key))
+            if (ItemData.ContainsKey(key))
             {
-                property = itemData[key];
+                property = ItemData[key];
             }
             else
             {
@@ -61,12 +65,12 @@ namespace ModdableInventory
         {
             T property;
 
-            if (itemData.ContainsKey(key))
+            if (ItemData.ContainsKey(key))
             {
                 try
                 {
                     property = (T) Convert.ChangeType(
-                    itemData[key], typeof(T), CultureInfo.InvariantCulture);
+                    ItemData[key], typeof(T), CultureInfo.InvariantCulture);
                 }
                 catch
                 {
@@ -79,14 +83,7 @@ namespace ModdableInventory
             {
                 property = defaultValue;
             }
-
-            // try 
-            // { 
-            //     property = (T)Convert.ChangeType(
-            //     itemData[key], typeof(T), CultureInfo.InvariantCulture); 
-            // }
-            // catch { property = defaultValue; }
-
+            
             return property;
         }
     }

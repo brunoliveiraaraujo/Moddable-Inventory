@@ -1,0 +1,26 @@
+Moddable Inventory (https://github.com/brunoliveiraaraujo/Moddable-Inventory)
+Copyright (c) 2021 Bruno de Oliveira Araújo
+
+This code runs on the Unity engine (https://unity.com/)
+Copyright © 2021 Unity Technologies.
+
+INI File Parser (https://github.com/rickyah/ini-parser)
+in /Assets/Plugins is
+Copyright (c) 2008 Ricardo Amores Hernández.
+Under the MIT License (MIT).
+
+Moq (https://www.nuget.org/packages/moq/)
+in /Assets/Plugins is
+Copyright (c) 2007, Clarius Consulting, Manas Technology Solutions, InSTEDD,
+and Contributors.
+Under the BSD 3-Clause License.
+
+CastleCore (https://www.nuget.org/packages/Castle.Core/)
+in /Assets/Plugins is
+Copyright 2004-2021 Castle Project - http://www.castleproject.org/.
+Under the Apache License, Version 2.0.
+
+System.Threading.Tasks.Extensions (https://www.nuget.org/packages/System.Threading.Tasks.Extensions/)
+in /Assets/Plugins is
+Copyright (c) .NET Foundation and Contributors.
+Under the MIT License (MIT).

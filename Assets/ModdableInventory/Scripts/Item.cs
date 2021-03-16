@@ -36,7 +36,7 @@ namespace ModdableInventory
                 throw new ArgumentOutOfRangeException($"stackLimit of \"{Name}\"", "cannot be negative");
         }
 
-        public virtual void LogItem(int decimalPlaces)
+        public virtual void LogItem(int decimalPlaces = 2)
         {
             Debug.Log($"{Name}");
             Debug.Log($"    cost={Cost}");

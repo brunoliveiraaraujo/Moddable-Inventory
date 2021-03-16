@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using System.Collections.ObjectModel;
-using IniParser;
-using IniParser.Model;
-using System.Linq;
 using System.IO;
+using YamlDotNet.RepresentationModel;
+using System.Text;
 
 namespace ModdableInventory
 {
@@ -24,134 +23,72 @@ namespace ModdableInventory
         {
             LoadDatabase();
         }
+        
 
         private void LoadDatabase()
         {
-            FileIniDataParser parser = new FileIniDataParser();
-
-            string fileName = "items.ini";
-            string editorIniPath = "./Assets/ModdableInventory/INI/";
-            #pragma warning disable 0219
-            string localIniPath = "./INI/";
-            #pragma warning restore 0219
+            string itemsData = Resources.Load<TextAsset>("items").text;
+            StringReader input = null;
 
             #if UNITY_EDITOR
-                IniData data = parser.ReadFile(editorIniPath + fileName);
+                input = new StringReader(itemsData);
             #else
-                if (!File.Exists(localIniPath + fileName))
+                if (!File.Exists("items.yaml"))
                 {
-                    GenerateItemsINI(localIniPath, fileName);
+                    File.WriteAllBytes("items.yaml", Encoding.ASCII.GetBytes(itemsData));
                 }
-                IniData data = parser.ReadFile(localIniPath + fileName);
+                input = new StringReader(File.ReadAllText("items.yaml"));
             #endif
 
-            items = ParseDatabase(parser, data);
+            items = ParseDatabase(input);
 
             onLoaded?.Invoke();
         }
 
-        private void GenerateItemsINI(string path, string fileName)
-        {
-            if (!Directory.Exists(path))
-            {
-                Directory.CreateDirectory(path);
-            }
-            using (StreamWriter writer = new StreamWriter(path + fileName))
-            {
-                writer.WriteLine("[WeaponTypes]");
-            }
-        }
-
-        private List<ItemCategory> ParseDatabase(FileIniDataParser parser, IniData data)
+        private List<ItemCategory> ParseDatabase(StringReader input)
         {
             List<ItemCategory> database = new List<ItemCategory>();
-            Dictionary<string, string> itemName_TypeName = new Dictionary<string, string>();
-            Dictionary<string, Item> itemName_Item = new Dictionary<string, Item>();
-            
-            // read types sections
-            foreach (SectionData section in data.Sections)
+
+            var yaml = new YamlStream();
+            yaml.Load(input);
+
+            var root = (YamlMappingNode)yaml.Documents[0].RootNode;
+
+            int i = 0;
+            foreach (var category in root.Children)
             {
-                if (section.SectionName.EndsWith("Types"))
+                string typeName = category.Key.ToString();
+
+                foreach (var entry in ((YamlMappingNode)category.Value).Children)
                 {
-                    string typeName = section.SectionName.Replace("Types", "");
-                    string categoryName = section.Keys["categoryName"];
-                    Type itemType = Type.GetType(typeName);
-                    Dictionary<int, string> itemID_itemName = new Dictionary<int, string>();
-
-                    database.Add(new ItemCategory(typeName, categoryName, new List<ItemSlot>()));
-
-                    foreach (var key in section.Keys)
+                    if (entry.Key.ToString().Equals("categoryName"))
                     {
-                        if (!key.KeyName.Equals("categoryName"))
+                        database.Add(new ItemCategory(typeName, entry.Value.ToString(), new List<ItemSlot>()));
+                    }
+                    else if (entry.Key.ToString().Equals("items"))
+                    {
+                        foreach (var item in ((YamlMappingNode)entry.Value).Children)
                         {
-                            int itemID = int.Parse(key.KeyName);
+                            Dictionary<string, string> itemData = new Dictionary<string, string>();
 
-                            itemID_itemName.Add(itemID, key.Value);
-
-                            if (itemID < 0) 
+                            foreach (var attribute in ((YamlMappingNode)item.Value).Children)
                             {
-                                throw new ArgumentOutOfRangeException(
-                                    $"index of \"{key.Value}\"", "cannot be negative");
+                                itemData.Add(attribute.Key.ToString(), attribute.Value.ToString());
+                            }
+
+                            Type itemType = Type.GetType(ITEMS_NAMESPACE + "." + typeName, true);
+                            Item instance = (Item) Activator.CreateInstance(itemType);
+
+                            instance.Initialize(itemData);
+                            
+                            if (database[i].TypeName.Equals(typeName))
+                            {
+                                database[i].ItemSlots.Add(new ItemSlot(instance));
                             }
                         }
                     }
-                    foreach (var orderedItems in itemID_itemName.OrderBy(key => key.Key))
-                    {
-                        itemName_TypeName.Add(orderedItems.Value, typeName);
-                    }
                 }
-            }
-
-            // read item sections
-            foreach (SectionData section in data.Sections)
-            {
-                foreach (KeyValuePair<string, string> nameEntry in itemName_TypeName)
-                {
-                    var itemName = nameEntry.Key;
-                    var typeName = nameEntry.Value;
-
-                    if (section.SectionName.Equals(itemName))
-                    {
-                        Type itemType = Type.GetType(ITEMS_NAMESPACE + "." + typeName, true);
-
-                        Item item = (Item) Activator.CreateInstance(itemType);
-                        
-                        Dictionary<string, string> itemData = new Dictionary<string, string>();
-
-                        foreach(KeyData key in section.Keys)
-                        {
-                            itemData.Add(key.KeyName, key.Value);
-                        }
-
-                        item.Initialize(itemData);
-
-                        itemName_Item.Add(section.SectionName, item);
-                    }
-                }
-            }
-
-            // populate database with initialized items
-            foreach (KeyValuePair<string,string> nameEntry in itemName_TypeName)
-            {
-                var itemName = nameEntry.Key;
-                var typeName = nameEntry.Value;
-
-                foreach (KeyValuePair<string,Item> itemEntry in itemName_Item)
-                {
-                    if (itemName.Equals(itemEntry.Key))
-                    {
-                        var item = itemEntry.Value;
-                        for (int i = 0; i < database.Count; i++)
-                        {
-                            if (database[i].TypeName.Equals(typeName))
-                            {
-                                database[i].ItemSlots.Add(new ItemSlot(item));
-                                break;
-                            }   
-                        }
-                        break;
-                    }
-                } 
+                i++;
             }
 
             return database;

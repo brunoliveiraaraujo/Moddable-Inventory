@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using IniParser;
 using IniParser.Model;
 using System.Linq;
+using System.IO;
 
 namespace ModdableInventory
 {
@@ -27,14 +28,41 @@ namespace ModdableInventory
         private void LoadDatabase()
         {
             FileIniDataParser parser = new FileIniDataParser();
-            IniData data = parser.ReadFile(".\\Assets\\ModdableInventory\\INI\\items.ini");
+
+            string fileName = "items.ini";
+            string editorIniPath = "./Assets/ModdableInventory/INI/";
+            #pragma warning disable 0219
+            string localIniPath = "./INI/";
+            #pragma warning restore 0219
+
+            #if UNITY_EDITOR
+                IniData data = parser.ReadFile(editorIniPath + fileName);
+            #else
+                if (!File.Exists(localIniPath + fileName))
+                {
+                    GenerateItemsINI(localIniPath, fileName);
+                }
+                IniData data = parser.ReadFile(localIniPath + fileName);
+            #endif
 
             items = ParseDatabase(parser, data);
 
             onLoaded?.Invoke();
         }
 
-        public List<ItemCategory> ParseDatabase(FileIniDataParser parser, IniData data)
+        private void GenerateItemsINI(string path, string fileName)
+        {
+            if (!Directory.Exists(path))
+            {
+                Directory.CreateDirectory(path);
+            }
+            using (StreamWriter writer = new StreamWriter(path + fileName))
+            {
+                writer.WriteLine("[WeaponTypes]");
+            }
+        }
+
+        private List<ItemCategory> ParseDatabase(FileIniDataParser parser, IniData data)
         {
             List<ItemCategory> database = new List<ItemCategory>();
             Dictionary<string, string> itemName_TypeName = new Dictionary<string, string>();

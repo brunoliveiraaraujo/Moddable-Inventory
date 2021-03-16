@@ -7,6 +7,7 @@ using System.Globalization;
 
 namespace Utils
 {
+    #if UNITY_EDITOR
     public static class EditorOperations
     {
         public static void ClearLog()
@@ -17,6 +18,7 @@ namespace Utils
             method.Invoke(new object(), null);
         }
     }
+    #endif
 
     public static class StringOperations
     {

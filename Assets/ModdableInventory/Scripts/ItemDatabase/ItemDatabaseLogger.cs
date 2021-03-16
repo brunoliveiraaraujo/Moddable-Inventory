@@ -3,16 +3,16 @@ using Utils;
 
 namespace ModdableInventory
 {
-    [RequireComponent(typeof(ItemDatabaseLoader))]
+    [RequireComponent(typeof(ItemDatabase))]
     public class ItemDatabaseLogger : MonoBehaviour 
     {
         [Min(0)][SerializeField] private int decimalPlaces = 2;
 
-        private ItemDatabaseLoader database;
+        private ItemDatabase database;
 
         private void Awake() 
         {
-            database = GetComponent<ItemDatabaseLoader>();
+            database = GetComponent<ItemDatabase>();
 
             database.onLoaded += DebugLogDatabase;
         }

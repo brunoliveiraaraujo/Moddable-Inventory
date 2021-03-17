@@ -9,7 +9,7 @@ namespace ModdableInventory
     public class InventoryLogger : MonoBehaviour
     {
         [Min(0)][SerializeField] private int decimalPlaces = 2;
-        [Min(0)][SerializeField] private bool TEMP_InventoryMockTest = true; // TODO remove this, use proper mock testing
+        [Min(0)][SerializeField] private bool TEMP_InventoryMockTest = true; // TODO remove this
 
         private Inventory inventory;
 
@@ -33,7 +33,7 @@ namespace ModdableInventory
             Debug.Log($"########## INVENTORY ##########");
             if (limitedByWeight)
             {
-                Debug.Log($"[Weight: {StringOperations.FloatToString(inventoryWeight, decimalPlaces)}/{StringOperations.FloatToString(weightCapacity, decimalPlaces)}]");
+                Debug.Log($"[Weight: {StringUtils.FloatToString(inventoryWeight, decimalPlaces)}/{StringUtils.FloatToString(weightCapacity, decimalPlaces)}]");
             }
             for (int i = 0 ; i < inventory.InventoryItems.Count; i++)
             {
@@ -45,28 +45,10 @@ namespace ModdableInventory
             }
         }
 
-        // TODO remove this, use proper mock testing
         private void Test_PopulateInventory()
         {
             inventory.AddItemToInventory("shortsword", 300);
-            inventory.AddItemToInventory("magic sword", 300);
-            inventory.AddItemToInventory("LeatherTunic", 300);
-            inventory.AddItemToInventory("Book of Knowledge", 300);
-            inventory.AddItemToInventory("triAnglEP", 300);
-
-            inventory.RemoveItemFromInventory("shortS", 220);
-            inventory.RemoveItemFromInventory("tunic", 500);
-            inventory.RemoveItemFromInventory("book", 500);
-
-            // inventory.AddItemToInventory(0, 0, 300);
-            // inventory.AddItemToInventory(0, 1, 300);
-            // inventory.AddItemToInventory(1, 0, 300);
-            // inventory.AddItemToInventory(2, 0, 300);
-            // inventory.AddItemToInventory(2, 1, 300);
-
-            // inventory.RemoveItemFromInventory(0, 0, 220);
-            // inventory.RemoveItemFromInventory(1, 0, 500);
-            // inventory.RemoveItemFromInventory(2, 0, 500);
+            inventory.AddItemToInventory("leather tunic", 1);
 
             inventory.Sorter.SortInventoryByNameAlphabetically();
         }

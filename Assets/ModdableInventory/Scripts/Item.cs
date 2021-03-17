@@ -42,7 +42,7 @@ namespace ModdableInventory
             Debug.Log($"    cost={Cost}");
             Debug.Log($"    stackLimit={StackLimit}");
             Debug.Log($"    multiStack={MultiStack}");
-            Debug.Log($"    weight={StringOperations.FloatToString(Weight, decimalPlaces)}");
+            Debug.Log($"    weight={StringUtils.FloatToString(Weight, decimalPlaces)}");
         }
 
         protected string SetProperty(string key, string defaultValue)

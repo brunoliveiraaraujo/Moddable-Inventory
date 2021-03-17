@@ -6,12 +6,14 @@ using System.Collections.ObjectModel;
 using System.IO;
 using YamlDotNet.RepresentationModel;
 using System.Text;
+using Utils;
 
 namespace ModdableInventory
 {
     public class ItemDatabase : MonoBehaviour
     {
         private const string ITEMS_NAMESPACE = "ModdableInventory.Items";
+        private const string ITEMS_YAML_PATH = "gamedata/config/items.yaml";
 
         private List<ItemCategory> items = new List<ItemCategory>();
         
@@ -24,20 +26,23 @@ namespace ModdableInventory
             LoadDatabase();
         }
         
-
         private void LoadDatabase()
         {
-            string itemsData = Resources.Load<TextAsset>("items").text;
+            string itemsData = Resources.Load<TextAsset>(Path.ChangeExtension(ITEMS_YAML_PATH, null)).text;
             StringReader input = null;
 
             #if UNITY_EDITOR
                 input = new StringReader(itemsData);
             #else
-                if (!File.Exists("items.yaml"))
+                if (File.Exists(ITEMS_YAML_PATH))
                 {
-                    File.WriteAllBytes("items.yaml", Encoding.ASCII.GetBytes(itemsData));
+                    input = new StringReader(File.ReadAllText(ITEMS_YAML_PATH));
                 }
-                input = new StringReader(File.ReadAllText("items.yaml"));
+                else
+                {
+                    input = new StringReader(itemsData);
+                    IOUtils.WriteFileToDirectory(ITEMS_YAML_PATH, itemsData);
+                }
             #endif
 
             items = ParseDatabase(input);
@@ -71,9 +76,9 @@ namespace ModdableInventory
                         {
                             Dictionary<string, string> itemData = new Dictionary<string, string>();
 
-                            foreach (var attribute in ((YamlMappingNode)item.Value).Children)
+                            foreach (var parameter in ((YamlMappingNode)item.Value).Children)
                             {
-                                itemData.Add(attribute.Key.ToString(), attribute.Value.ToString());
+                                itemData.Add(parameter.Key.ToString(), parameter.Value.ToString());
                             }
 
                             Type itemType = Type.GetType(ITEMS_NAMESPACE + "." + typeName, true);
@@ -90,7 +95,6 @@ namespace ModdableInventory
                 }
                 i++;
             }
-
             return database;
         }
     }

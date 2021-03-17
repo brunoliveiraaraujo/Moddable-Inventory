@@ -1,4 +1,4 @@
-##### items.ini #####
+##### items.yaml #####
 # This file contains the data of all items in the game.
 # Each item is defined in their corresponding item category (named after an Item Subclass).
 
@@ -11,7 +11,7 @@
 #       ...
 #     ...
 
-# When a key in an item is not defined, the game loads it's default value instead
+# When a parameter in an item is not defined, the game loads it's default value instead
 # Parameters used in all items:
 # name: {string, default="generic_item"} # the in-game name of the item
 # cost: {int, default=0}                 # the item's base cost

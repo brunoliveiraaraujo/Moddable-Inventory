@@ -4,14 +4,20 @@ using UnityEngine;
 using System;
 using System.Collections.ObjectModel;
 using Utils;
+using System.IO;
+using System.Text;
+using YamlDotNet.RepresentationModel;
+using System.Globalization;
 
 namespace ModdableInventory
 {
     [RequireComponent(typeof(ItemDatabase))]
     public class Inventory : MonoBehaviour
-    {        
-        [SerializeField] private bool limitedByWeight = false;
-        [Min(0)][SerializeField] private float weightCapacity;
+    {       
+        private const string INVENTORY_YAML_PATH = "gamedata/config/inventory.yaml";
+
+        private bool limitedByWeight = false;
+        private float weightCapacity = 0;
 
         private ItemDatabase database;
         private List<ItemCategory> inventory = new List<ItemCategory>();
@@ -26,7 +32,7 @@ namespace ModdableInventory
 
         public Action onInitialized;
         public Action slotFull;
-        public Action weightLimitReached;
+        public Action inventoryFull;
 
         private void Awake() 
         {
@@ -40,12 +46,54 @@ namespace ModdableInventory
         {
             database.onLoaded -= InitializeInventory;
 
+            string inventoryData = Resources.Load<TextAsset>(Path.ChangeExtension(INVENTORY_YAML_PATH, null)).text;
+            StringReader input = null;
+
+            #if UNITY_EDITOR
+                input = new StringReader(inventoryData);
+            #else
+                if (File.Exists(INVENTORY_YAML_PATH))
+                {
+                    input = new StringReader(File.ReadAllText(INVENTORY_YAML_PATH));
+                }
+                else
+                {
+                    input = new StringReader(inventoryData);
+                    IOUtils.WriteFileToDirectory(INVENTORY_YAML_PATH, inventoryData);
+                }
+            #endif
+
+            try { LoadInventoryParameters(input); } catch {} // if can't load inventory.yaml, use defaults
+
             for (int i = 0; i < database.Items.Count; i++)
             {
                 inventory.Add(new ItemCategory(database.Items[i].TypeName, database.Items[i].CategoryName, new List<ItemSlot>()));
             }
 
             onInitialized?.Invoke();
+        }
+
+        private void LoadInventoryParameters(StringReader input)
+        {
+            var yaml = new YamlStream();
+            yaml.Load(input);
+
+            var root = (YamlMappingNode)yaml.Documents[0].RootNode;
+
+            foreach (var parameter in root.Children)
+            {
+                string keyName = parameter.Key.ToString();
+                string valueName = parameter.Value.ToString();
+
+                if (keyName.Equals("limitedByWeight"))
+                {
+                    limitedByWeight = bool.Parse(valueName.ToString());
+                }
+                else if (keyName.Equals("weightCapacity"))
+                {
+                    weightCapacity = float.Parse(valueName.ToString(), CultureInfo.InvariantCulture);
+                }
+            }
         }
 
         // adds first Item found in database which <item.Name> that contains <name>
@@ -73,10 +121,12 @@ namespace ModdableInventory
             Item item = GetItemFromDatabase(categoryID, itemID);
             ItemSlot currSlot = GetLastSlotWithItem(categoryID, itemID);
 
-            if (limitedByWeight && WillReachWeightLimit(item.Weight, addAmount))
+            if (limitedByWeight && ReachedWeightLimit(item.Weight, ref addAmount))
             {
-                weightLimitReached?.Invoke();
-                return;
+                // TODO: return the amount of items that could not add, or something similar
+                inventoryFull?.Invoke();
+
+                if (addAmount == 0) return;
             }
 
             int amountLeftToAdd = addAmount;
@@ -129,18 +179,23 @@ namespace ModdableInventory
             }
         }
 
-        private bool WillReachWeightLimit(float itemWeight, int addAmount)
+        private bool ReachedWeightLimit(float itemWeight, ref int addAmount)
         {
+            bool result = false;
+
             while (inventoryWeight + itemWeight * addAmount > weightCapacity)
             {
-                if (addAmount == 1)
-                {
-                    return true;
-                }
+                result = true;
+
                 addAmount--;
+
+                if (addAmount == 0)
+                {
+                    return result;
+                }
             }
 
-            return false;
+            return result;
         }
 
         private void AddNewItemSlot(ref ItemSlot currSlot, int categoryID, int itemID, int itemAmount)
@@ -197,8 +252,8 @@ namespace ModdableInventory
                 {
                     string currItemName = database.Items[i].ItemSlots[j].Item.Name;
 
-                    currItemName = StringOperations.NoSpacesAndLowerCaseString(currItemName);
-                    nameToSearch = StringOperations.NoSpacesAndLowerCaseString(nameToSearch);
+                    currItemName = StringUtils.NoSpacesAndLowerCaseString(currItemName);
+                    nameToSearch = StringUtils.NoSpacesAndLowerCaseString(nameToSearch);
 
                     if (currItemName.Contains(nameToSearch))
                     {

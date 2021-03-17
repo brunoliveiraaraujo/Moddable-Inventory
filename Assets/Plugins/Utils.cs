@@ -4,23 +4,12 @@ using UnityEngine;
 using UnityEditor;
 using System.Reflection;
 using System.Globalization;
+using System.IO;
+using System.Text;
 
 namespace Utils
 {
-    #if UNITY_EDITOR
-    public static class EditorOperations
-    {
-        public static void ClearLog()
-        {
-            var assembly = Assembly.GetAssembly(typeof(Editor));
-            var type = assembly.GetType("UnityEditor.LogEntries");
-            var method = type.GetMethod("Clear");
-            method.Invoke(new object(), null);
-        }
-    }
-    #endif
-
-    public static class StringOperations
+    public static class StringUtils
     {
         public static string FloatToString(float number, int precision)
         {
@@ -30,6 +19,15 @@ namespace Utils
         public static string NoSpacesAndLowerCaseString(string str)
         {
             return str.Replace(" ", "").ToLower();
+        }
+    }
+
+    public static class IOUtils
+    {
+        public static void WriteFileToDirectory(string filePath, string fileData)
+        {
+            Directory.CreateDirectory(Path.GetDirectoryName(filePath));
+            File.WriteAllBytes(filePath, Encoding.ASCII.GetBytes(fileData));
         }
     }
 }

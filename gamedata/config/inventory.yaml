@@ -1,0 +1,11 @@
+##### inventory.yaml #####
+# This file contains configuration data for the player's inventory.
+
+# Parameters used in inventory.yaml:
+# limitedByWeight: {bool, default=false} 
+  # should the inventory be limited by the weight of it's items
+# weightCapacity: {float, default=0} 
+  # the maximum amount of weight this inventory can hold
+
+limitedByWeight: true
+weightCapacity: 100

@@ -7,9 +7,9 @@ namespace ModdableInventory.Items
     {
         public int Attack { get; private set; }
 
-        public override void Initialize(Dictionary<string, string> itemData)
+        public override void Initialize(string idName, Dictionary<string, string> itemData)
         {
-            base.Initialize(itemData);
+            base.Initialize(idName, itemData);
             Attack = SetProperty<int>("attack", 0);
         }
 

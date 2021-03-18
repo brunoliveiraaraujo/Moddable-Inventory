@@ -6,7 +6,7 @@
 # <ItemClass>:
 #   categoryName:<string> # the in-game name of this item category>
 #   items:
-#     <item_entry>:       # unique identifier for this item  
+#     <itemEntry>:       # unique identifier for this item  
 #       <key>:<value>     # parameters used on this class of item
 #       ...
 #     ...
@@ -18,6 +18,9 @@
 # weight: {float, default=0}             # the item's weight
 # stackLimit: {int, default=99}          # maximum number of this item in a stack               
 # multiStack: {bool, default=true}       # allow additional stacks in inventory?
+# spritePath: {string, default="<itemEntry>.png"} 
+  # path to the item's sprite, relative to "<game_folder>/gamedata/sprites/items/"
+  # supported sprite formats are: .bmp, .exr, .gif, .hdr, .iff, .jpg, .pict, .png, .psd, .tga and .tiff
 
 ## Weapons ##
 # Parameters used in Weapons:

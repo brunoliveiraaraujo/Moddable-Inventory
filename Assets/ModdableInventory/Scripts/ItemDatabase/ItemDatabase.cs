@@ -74,17 +74,23 @@ namespace ModdableInventory
                     {
                         foreach (var item in ((YamlMappingNode)entry.Value).Children)
                         {
+                            string idName = item.Key.ToString();
+
                             Dictionary<string, string> itemData = new Dictionary<string, string>();
 
-                            foreach (var parameter in ((YamlMappingNode)item.Value).Children)
+                            try 
                             {
-                                itemData.Add(parameter.Key.ToString(), parameter.Value.ToString());
+                                foreach (var parameter in ((YamlMappingNode)item.Value).Children)
+                                {
+                                    itemData.Add(parameter.Key.ToString(), parameter.Value.ToString());
+                                }
                             }
+                            catch (InvalidCastException) {}
 
                             Type itemType = Type.GetType(ITEMS_NAMESPACE + "." + typeName, true);
                             Item instance = (Item) Activator.CreateInstance(itemType);
 
-                            instance.Initialize(itemData);
+                            instance.Initialize(idName, itemData);
                             
                             if (database[i].TypeName.Equals(typeName))
                             {

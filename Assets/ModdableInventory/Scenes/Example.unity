@@ -313,7 +313,7 @@ GameObject:
   - component: {fileID: 1237307646}
   - component: {fileID: 1237307645}
   m_Layer: 0
-  m_Name: Inventory (w/ INI parsing)
+  m_Name: Inventory
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -345,10 +345,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67c432925390bbf408dc390ee22d423c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  addressableTextAsset:
-    m_AssetGUID: b1d2f40660bec12499f2ea4518bd3df9
-    m_SubObjectName: 
-    m_SubObjectType: 
 --- !u!114 &1237307644
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -388,8 +384,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7b73938109fc65d45a1c0004a24bc371, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  limitedByWeight: 0
-  weightCapacity: 0
 --- !u!850595691 &1920194320
 LightingSettings:
   m_ObjectHideFlags: 0

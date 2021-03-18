@@ -124,7 +124,10 @@ namespace ModdableInventory
 
         private Sprite LoadGamedataSprite(string spritePath)
         {
-            Directory.CreateDirectory(SPRITES_FOLDER_PATH);
+            #if UNITY_EDITOR
+            #else
+                Directory.CreateDirectory(SPRITES_FOLDER_PATH);
+            #endif
 
             Sprite sprite = null;
 

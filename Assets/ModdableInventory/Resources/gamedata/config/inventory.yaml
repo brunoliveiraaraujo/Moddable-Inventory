@@ -7,5 +7,5 @@
 # weightCapacity: {float, default=0} 
   # the maximum amount of weight this inventory can hold
 
-limitedByWeight: true
-weightCapacity: 100
+limitedByWeight: false
+weightCapacity: 0

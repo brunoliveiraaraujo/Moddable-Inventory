@@ -14,12 +14,12 @@ namespace ModdableInventory
         {
             database = GetComponent<ItemDatabase>();
 
-            database.onLoaded += DebugLogDatabase;
+            database.onDatabaseInitialized += DebugLogDatabase;
         }
 
         private void DebugLogDatabase()
         {
-            this.database.onLoaded -= DebugLogDatabase;
+            this.database.onDatabaseInitialized -= DebugLogDatabase;
 
             var items = this.database.Items;
 

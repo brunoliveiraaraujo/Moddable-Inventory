@@ -345,6 +345,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67c432925390bbf408dc390ee22d423c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  extractAllItemsSprites: 1
 --- !u!114 &1237307644
 MonoBehaviour:
   m_ObjectHideFlags: 0

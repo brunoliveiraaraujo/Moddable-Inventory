@@ -2,7 +2,14 @@
 # This file contains the data of all items in the game.
 # Each item is defined in their corresponding item category (named after an Item Subclass).
 
-# Entries in this file use the following format:
+## General Settings ##
+# extractSpriteData: {bool} 
+  # should the game extract all internal sprites to "<game_folder>/gamedata/sprites/items/" on start?
+  # extracted sprites does NOT overwrite existing sprites
+extractSpriteData: false
+
+## Item Categories ##
+# Entries in item categories use the following format:
 # <ItemClass>:
 #   categoryName:<string> # the in-game name of this item category>
 #   items:

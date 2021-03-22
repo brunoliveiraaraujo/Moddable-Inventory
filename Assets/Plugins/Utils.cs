@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
-using System.Reflection;
 using System.Globalization;
 using System.IO;
-using System.Text;
 
 namespace Utils
 {
@@ -24,10 +22,26 @@ namespace Utils
 
     public static class IOUtils
     {
-        public static void WriteFileToDirectory(string filePath, string fileData)
+        public static void WriteFileToDirectory(string filePath, byte[] fileData)
         {
             Directory.CreateDirectory(Path.GetDirectoryName(filePath));
-            File.WriteAllBytes(filePath, Encoding.ASCII.GetBytes(fileData));
+
+            if (!File.Exists(filePath)) // make sure not to overwrite
+            {
+                File.WriteAllBytes(filePath, fileData);
+            }
+        }
+    }
+
+    public static class EditorUtils
+    {
+        public static bool IsUnityEditor()
+        {
+            #if UNITY_EDITOR
+                return true;
+            #else
+                return false;
+            #endif
         }
     }
 }

@@ -30,7 +30,7 @@ namespace ModdableInventory
         public float InventoryWeight => inventoryWeight;
         public InventorySorter Sorter => sorter;
 
-        public Action onInitialized;
+        public Action onInventoryInitialized;
         public Action slotFull;
         public Action inventoryFull;
 
@@ -39,29 +39,32 @@ namespace ModdableInventory
             database = GetComponent<ItemDatabase>();
             sorter = new InventorySorter(inventory);
 
-            database.onLoaded += InitializeInventory;
+            database.onDatabaseInitialized += InitializeInventory;
         }
 
         private void InitializeInventory()
         {
-            database.onLoaded -= InitializeInventory;
+            database.onDatabaseInitialized -= InitializeInventory;
 
-            string inventoryData = Resources.Load<TextAsset>(Path.ChangeExtension(INVENTORY_YAML_PATH, null)).text;
+            string internalInventoryYAML = Resources.Load<TextAsset>(Path.ChangeExtension(INVENTORY_YAML_PATH, null)).text;
             StringReader input = null;
 
-            #if UNITY_EDITOR
-                input = new StringReader(inventoryData);
-            #else
+            if (EditorUtils.IsUnityEditor())
+            {
+                input = new StringReader(internalInventoryYAML);
+            }
+            else
+            {
                 if (File.Exists(INVENTORY_YAML_PATH))
                 {
                     input = new StringReader(File.ReadAllText(INVENTORY_YAML_PATH));
                 }
                 else
                 {
-                    input = new StringReader(inventoryData);
-                    IOUtils.WriteFileToDirectory(INVENTORY_YAML_PATH, inventoryData);
+                    input = new StringReader(internalInventoryYAML);
+                    IOUtils.WriteFileToDirectory(INVENTORY_YAML_PATH, Encoding.ASCII.GetBytes(internalInventoryYAML));
                 }
-            #endif
+            }
 
             try { LoadInventoryParameters(input); } catch {} // if can't load inventory.yaml, use defaults
 
@@ -70,7 +73,7 @@ namespace ModdableInventory
                 inventory.Add(new ItemCategory(database.Items[i].TypeName, database.Items[i].CategoryName, new List<ItemSlot>()));
             }
 
-            onInitialized?.Invoke();
+            onInventoryInitialized?.Invoke();
         }
 
         private void LoadInventoryParameters(StringReader input)

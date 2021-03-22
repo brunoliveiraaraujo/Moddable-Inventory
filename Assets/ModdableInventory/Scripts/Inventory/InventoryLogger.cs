@@ -17,12 +17,12 @@ namespace ModdableInventory
         {
             inventory = GetComponent<Inventory>();
 
-            inventory.onInitialized += DebugLogInventory;
+            inventory.onInventoryInitialized += DebugLogInventory;
         }
 
         private void DebugLogInventory()
         {
-            inventory.onInitialized -= DebugLogInventory;
+            inventory.onInventoryInitialized -= DebugLogInventory;
 
             if (TEMP_InventoryMockTest) Test_PopulateInventory();
 

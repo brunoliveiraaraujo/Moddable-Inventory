@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 using System.Collections.ObjectModel;
-using Utils;
+using ModdableInventory.Utils;
 using System.IO;
 using System.Text;
 using YamlDotNet.RepresentationModel;
@@ -18,18 +18,18 @@ namespace ModdableInventory
 
         private bool limitedByWeight = false;
         private float weightCapacity = 0;
+        private float currentWeight = 0;
 
         private ItemDatabase database;
         private List<ItemCategory> inventoryItems = new List<ItemCategory>();
         private List<EquipmentSlot> equippedItems = new List<EquipmentSlot>();
-        private float inventoryWeight = 0;
         private InventorySorter sorter;
 
         public ReadOnlyCollection<ItemCategory> InventoryItems => inventoryItems.AsReadOnly();
         public ReadOnlyCollection<EquipmentSlot> EquippedItems => equippedItems.AsReadOnly();
         public bool LimitedByWeight => limitedByWeight;
         public float WeightCapacity => weightCapacity;
-        public float InventoryWeight => inventoryWeight;
+        public float CurrentWeight => currentWeight;
         public InventorySorter Sorter => sorter;
 
         public Action onInventoryInitialized;
@@ -68,7 +68,7 @@ namespace ModdableInventory
                 }
             }
 
-            try { ParseInventory(input); } catch {}
+            ParseInventory(input);
 
             for (int i = 0; i < database.Items.Count; i++)
             {
@@ -158,7 +158,6 @@ namespace ModdableInventory
 
             if (limitedByWeight && ReachedWeightLimit(item.Weight, ref addAmount))
             {
-                // TODO: return the amount of items that could not add, or something similar
                 inventoryFull?.Invoke();
 
                 if (addAmount == 0) return;
@@ -220,13 +219,21 @@ namespace ModdableInventory
 
             if (item != null)
             {
-                RemoveItemFromInventory(itemName);
-                
                 foreach (var slot in equippedItems)
                 {
-                    if (item.GetType().Name.Equals(slot.TypeName))
+                    if (item.GetType().Name.Equals(slot.TypeName) || item.GetType().BaseType.Name.Equals(slot.TypeName))
                     {
-                        slot.Item = item;
+                        if (slot.Item == null)
+                        {
+                            slot.Item = item;
+                            RemoveItemFromInventory(itemName);
+                            currentWeight += item.Weight;
+                            return;
+                        }
+                        else
+                        {
+                            continue;
+                        }
                     }
                 }
             }
@@ -238,13 +245,21 @@ namespace ModdableInventory
 
             if (item != null)
             {
-                AddItemToInventory(itemName);
-
                 foreach (var slot in equippedItems)
                 {
-                    if (item.GetType().Name.Equals(slot.TypeName))
+                    if (item.GetType().Name.Equals(slot.TypeName) || item.GetType().BaseType.Name.Equals(slot.TypeName))
                     {
-                        slot.Item = null;
+                        if (slot.Item != null)
+                        {
+                            slot.Item = null;
+                            currentWeight -= item.Weight;
+                            AddItemToInventory(itemName);
+                            return;
+                        }
+                        else
+                        {
+                             continue;
+                        }
                     }
                 }
             }
@@ -256,11 +271,7 @@ namespace ModdableInventory
             {
                 if (slot.Item != null)
                 {
-                    // TODO: make this into a method to avoid repeated code
-                    string currItemName = StringUtils.NoSpacesAndLowerCaseString(slot.Item.Name);
-                    string nameToSearch = StringUtils.NoSpacesAndLowerCaseString(name);
-
-                    if (currItemName.Contains(nameToSearch))
+                    if (StringUtils.StringContainsName(slot.Item.Name, name))
                     {
                         return slot.Item;
                     }
@@ -276,10 +287,7 @@ namespace ModdableInventory
             {
                 foreach (var slot in category.ItemSlots)
                 {
-                    string currItemName = StringUtils.NoSpacesAndLowerCaseString(slot.Item.Name);
-                    string nameToSearch = StringUtils.NoSpacesAndLowerCaseString(name);
-
-                    if (currItemName.Contains(nameToSearch))
+                    if (StringUtils.StringContainsName(slot.Item.Name, name))
                     {
                         return slot.Item;
                     }
@@ -293,7 +301,7 @@ namespace ModdableInventory
         {
             bool result = false;
 
-            while (inventoryWeight + itemWeight * addAmount > weightCapacity)
+            while (currentWeight + itemWeight * addAmount > weightCapacity)
             {
                 result = true;
 
@@ -313,19 +321,19 @@ namespace ModdableInventory
             Item item = GetItemFromDatabase(categoryID, itemID);
 
             inventoryItems[categoryID].ItemSlots.Add(currSlot = new InventorySlot(item, Mathf.Min(itemAmount, item.StackLimit)));
-            inventoryWeight += currSlot.Weight;
+            currentWeight += currSlot.Weight;
         }
 
         private void UpdateItemSlot(InventorySlot currSlot, int newAmount)
         {
-            inventoryWeight -= currSlot.Weight;
+            currentWeight -= currSlot.Weight;
             currSlot.SetAmount(newAmount);
-            inventoryWeight += currSlot.Weight;
+            currentWeight += currSlot.Weight;
         }
 
         private void RemoveItemSlot(InventorySlot currSlot, int categoryID)
         {
-            inventoryWeight -= currSlot.Weight;
+            currentWeight -= currSlot.Weight;
             inventoryItems[categoryID].ItemSlots.Remove(currSlot);
         }
 
@@ -362,10 +370,7 @@ namespace ModdableInventory
                 {
                     string currItemName = database.Items[i].ItemSlots[j].Item.Name;
 
-                    currItemName = StringUtils.NoSpacesAndLowerCaseString(currItemName);
-                    nameToSearch = StringUtils.NoSpacesAndLowerCaseString(nameToSearch);
-
-                    if (currItemName.Contains(nameToSearch))
+                    if (StringUtils.StringContainsName(currItemName, nameToSearch))
                     {
                         return (true, i, j);
                     }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using UnityEngine;
-using Utils;
+using ModdableInventory.Utils;
 
 namespace ModdableInventory
 {
@@ -50,11 +50,14 @@ namespace ModdableInventory
 
         public virtual void LogItem(int decimalPlaces = 2)
         {
-            // TODO: move this to a class responsible for UI stuff
+            // TODO: UI: use a class responsible for UI stuff instead
             GameObject display = new GameObject(IdName);
             SpriteRenderer spriteRenderer = display.AddComponent<SpriteRenderer>();
             spriteRenderer.sprite = ItemSprite;
             display.transform.position = new Vector3(Weight/10, 1, -9);
+            // ENDTODO
+
+            // TODO: UI: use Applicatoin.logMessageReceived to get access to all exceptions and eventually show them in-game
         
             Debug.Log($"{Name}");
             Debug.Log($"    cost={Cost}");

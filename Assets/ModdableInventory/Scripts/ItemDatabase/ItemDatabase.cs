@@ -6,7 +6,7 @@ using System.Collections.ObjectModel;
 using System.IO;
 using YamlDotNet.RepresentationModel;
 using System.Text;
-using Utils;
+using ModdableInventory.Utils;
 
 namespace ModdableInventory
 {

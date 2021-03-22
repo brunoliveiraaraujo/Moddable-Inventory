@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Utils;
+using ModdableInventory.Utils;
 
 namespace ModdableInventory
 {
@@ -9,7 +9,8 @@ namespace ModdableInventory
     public class InventoryLogger : MonoBehaviour
     {
         [Min(0)][SerializeField] private int decimalPlaces = 2;
-        [Min(0)][SerializeField] private bool testExampleInventory = true; // TODO remove this
+        // TODO: Example: remove this, use an example scene instead
+        [Min(0)][SerializeField] private bool testExampleInventory = true; 
 
         private Inventory inventory;
 
@@ -24,17 +25,22 @@ namespace ModdableInventory
         {
             inventory.onInventoryInitialized -= InitializeInventoryLogger;
 
+            Debug.Log("########## INVENTORY LOG ##########");
+
             if (testExampleInventory) Test_PopulateInventory();
             if (testExampleInventory) Test_EquipItems();
+
+            LogEquippedItems();
+            LogInventory();
         }
 
         private void LogInventory()
         {
             var limitedByWeight = inventory.LimitedByWeight;
             var weightCapacity = inventory.WeightCapacity;
-            var inventoryWeight = inventory.InventoryWeight;
+            var inventoryWeight = inventory.CurrentWeight;
 
-            Debug.Log($"########## INVENTORY ##########");
+            Debug.Log($"##### Inventory #####");
             if (limitedByWeight)
             {
                 Debug.Log($"[Weight: {StringUtils.FloatToString(inventoryWeight, decimalPlaces)}/{StringUtils.FloatToString(weightCapacity, decimalPlaces)}]");
@@ -51,10 +57,10 @@ namespace ModdableInventory
 
         private void LogEquippedItems()
         {
-            Debug.Log($"########## EQUIPMENT ##########");
+            Debug.Log($"##### Equipment #####");
             foreach (var slot in inventory.EquippedItems)
             {
-                Debug.Log($"=== {slot.SlotName} ({slot.TypeName}) ===");
+                Debug.Log($"> {slot.SlotName} ({slot.TypeName}):");
                 if (slot.Item != null)
                 {
                     Debug.Log($"    {slot.Item.Name}");
@@ -78,15 +84,17 @@ namespace ModdableInventory
 
         private void Test_EquipItems()
         {
+            Debug.Log("===== Book of Knowledge Equipped =====");
+            inventory.EquipItem("book of knowledge");
+
+            Debug.Log("===== Short Sword Equipped =====");
             inventory.EquipItem("shortsword");
 
             LogEquippedItems();
             LogInventory();
 
+            Debug.Log("===== Short Sword Unequiped =====");
             inventory.UnequipItem("shortsword");
-
-            LogEquippedItems();
-            LogInventory();
         }
     } 
 }

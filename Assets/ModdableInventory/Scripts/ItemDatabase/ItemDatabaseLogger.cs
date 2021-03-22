@@ -1,5 +1,5 @@
 using UnityEngine;
-using Utils;
+using ModdableInventory.Utils;
 
 namespace ModdableInventory
 {

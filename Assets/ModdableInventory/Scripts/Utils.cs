@@ -5,7 +5,7 @@ using UnityEditor;
 using System.Globalization;
 using System.IO;
 
-namespace Utils
+namespace ModdableInventory.Utils
 {
     public static class StringUtils
     {
@@ -17,6 +17,17 @@ namespace Utils
         public static string NoSpacesAndLowerCaseString(string str)
         {
             return str.Replace(" ", "").ToLower();
+        }
+
+        public static bool StringContainsName(string str, string name, bool ignoreSpacesAndCasing = true)
+        {
+            if (ignoreSpacesAndCasing)
+            {
+                str = StringUtils.NoSpacesAndLowerCaseString(str);
+                name = StringUtils.NoSpacesAndLowerCaseString(name);
+            }
+
+            return str.Contains(name);
         }
     }
 

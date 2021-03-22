@@ -12,7 +12,6 @@ namespace ModdableInventory
 {
     public class ItemDatabase : MonoBehaviour
     {
-
         private const string ITEMS_NAMESPACE = "ModdableInventory.Items";
         private const string ITEMS_YAML_PATH = "gamedata/config/itemDatabase.yaml";
 
@@ -101,7 +100,7 @@ namespace ModdableInventory
             {
                 if (entry.Key.ToString().Equals("categoryName"))
                 {
-                    database.Add(new ItemCategory(typeName, entry.Value.ToString(), new List<ItemSlot>()));
+                    database.Add(new ItemCategory(typeName, entry.Value.ToString(), new List<InventorySlot>()));
                 }
                 else if (entry.Key.ToString().Equals("items"))
                 {
@@ -133,7 +132,7 @@ namespace ModdableInventory
 
             instance.Initialize(idName, itemData);
             
-            database[categoryID].ItemSlots.Add(new ItemSlot(instance));
+            database[categoryID].ItemSlots.Add(new InventorySlot(instance));
         }
     }
 }

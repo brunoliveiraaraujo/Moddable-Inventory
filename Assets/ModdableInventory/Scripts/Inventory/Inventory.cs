@@ -20,11 +20,13 @@ namespace ModdableInventory
         private float weightCapacity = 0;
 
         private ItemDatabase database;
-        private List<ItemCategory> inventory = new List<ItemCategory>();
+        private List<ItemCategory> inventoryItems = new List<ItemCategory>();
+        private List<EquipmentSlot> equippedItems = new List<EquipmentSlot>();
         private float inventoryWeight = 0;
         private InventorySorter sorter;
 
-        public ReadOnlyCollection<ItemCategory> InventoryItems => inventory.AsReadOnly();
+        public ReadOnlyCollection<ItemCategory> InventoryItems => inventoryItems.AsReadOnly();
+        public ReadOnlyCollection<EquipmentSlot> EquippedItems => equippedItems.AsReadOnly();
         public bool LimitedByWeight => limitedByWeight;
         public float WeightCapacity => weightCapacity;
         public float InventoryWeight => inventoryWeight;
@@ -37,7 +39,7 @@ namespace ModdableInventory
         private void Awake() 
         {
             database = GetComponent<ItemDatabase>();
-            sorter = new InventorySorter(inventory);
+            sorter = new InventorySorter(inventoryItems);
 
             database.onDatabaseInitialized += InitializeInventory;
         }
@@ -66,27 +68,27 @@ namespace ModdableInventory
                 }
             }
 
-            try { LoadInventoryParameters(input); } catch {} // if can't load inventory.yaml, use defaults
+            try { ParseInventory(input); } catch {}
 
             for (int i = 0; i < database.Items.Count; i++)
             {
-                inventory.Add(new ItemCategory(database.Items[i].TypeName, database.Items[i].CategoryName, new List<ItemSlot>()));
+                inventoryItems.Add(new ItemCategory(database.Items[i].TypeName, database.Items[i].CategoryName, new List<InventorySlot>()));
             }
 
             onInventoryInitialized?.Invoke();
         }
 
-        private void LoadInventoryParameters(StringReader input)
+        private void ParseInventory(StringReader input)
         {
             var yaml = new YamlStream();
             yaml.Load(input);
 
             var root = (YamlMappingNode)yaml.Documents[0].RootNode;
 
-            foreach (var parameter in root.Children)
+            foreach (var topLevelNode in root.Children)
             {
-                string keyName = parameter.Key.ToString();
-                string valueName = parameter.Value.ToString();
+                string keyName = topLevelNode.Key.ToString();
+                string valueName = topLevelNode.Value.ToString();
 
                 if (keyName.Equals("limitedByWeight"))
                 {
@@ -96,6 +98,36 @@ namespace ModdableInventory
                 {
                     weightCapacity = float.Parse(valueName.ToString(), CultureInfo.InvariantCulture);
                 }
+                else if (keyName.Equals("equipmentSlots"))
+                {
+                    ParseEquipmentSlots(topLevelNode);
+                }
+            }
+        }
+
+        private void ParseEquipmentSlots(KeyValuePair<YamlNode, YamlNode> topLevelNode)
+        {
+            foreach (var slot in ((YamlMappingNode)topLevelNode.Value).Children)
+            {
+                string slotName = null;
+                string typeName = null;
+
+                foreach (var parameter in ((YamlMappingNode)slot.Value).Children)
+                {
+                    string keyName = parameter.Key.ToString();
+                    string valueName = parameter.Value.ToString();
+
+                    if (keyName.Equals("name"))
+                    {
+                        slotName = valueName;
+                    }
+                    else if (keyName.Equals("itemType"))
+                    {
+                        typeName = valueName;
+                    }
+                }
+
+                equippedItems.Add(new EquipmentSlot(slotName, typeName));
             }
         }
 
@@ -122,7 +154,7 @@ namespace ModdableInventory
         public void AddItemToInventory(int categoryID, int itemID, int addAmount = 1)
         {
             Item item = GetItemFromDatabase(categoryID, itemID);
-            ItemSlot currSlot = GetLastSlotWithItem(categoryID, itemID);
+            InventorySlot currSlot = GetLastSlotWithItem(categoryID, itemID);
 
             if (limitedByWeight && ReachedWeightLimit(item.Weight, ref addAmount))
             {
@@ -138,7 +170,7 @@ namespace ModdableInventory
             {
                 int previousAmountInSlot = 0;
 
-                if (currSlot == null || currSlot.IsFull())
+                if (currSlot == null || currSlot.IsFull)
                 {
                     AddNewItemSlot(ref currSlot, categoryID, itemID, amountLeftToAdd);
                 }
@@ -156,7 +188,7 @@ namespace ModdableInventory
         public void RemoveItemFromInventory(int categoryID, int itemID, int subAmount = 1)
         {
             Item item = GetItemFromDatabase(categoryID, itemID);
-            ItemSlot currSlot = GetLastSlotWithItem(categoryID, itemID);
+            InventorySlot currSlot = GetLastSlotWithItem(categoryID, itemID);
 
             int amountLeftToSub = subAmount;
 
@@ -182,6 +214,81 @@ namespace ModdableInventory
             }
         }
 
+        public void EquipItem(string itemName)
+        {
+            Item item = GetItemFromInventory(itemName);
+
+            if (item != null)
+            {
+                RemoveItemFromInventory(itemName);
+                
+                foreach (var slot in equippedItems)
+                {
+                    if (item.GetType().Name.Equals(slot.TypeName))
+                    {
+                        slot.Item = item;
+                    }
+                }
+            }
+        }
+
+        public void UnequipItem(string itemName)
+        {
+            Item item = GetItemFromEquipped(itemName);
+
+            if (item != null)
+            {
+                AddItemToInventory(itemName);
+
+                foreach (var slot in equippedItems)
+                {
+                    if (item.GetType().Name.Equals(slot.TypeName))
+                    {
+                        slot.Item = null;
+                    }
+                }
+            }
+        }
+
+        private Item GetItemFromEquipped(string name)
+        {
+            foreach (var slot in equippedItems)
+            {
+                if (slot.Item != null)
+                {
+                    // TODO: make this into a method to avoid repeated code
+                    string currItemName = StringUtils.NoSpacesAndLowerCaseString(slot.Item.Name);
+                    string nameToSearch = StringUtils.NoSpacesAndLowerCaseString(name);
+
+                    if (currItemName.Contains(nameToSearch))
+                    {
+                        return slot.Item;
+                    }
+                }
+            }
+
+            return null;
+        }
+
+        private Item GetItemFromInventory(string name)
+        {
+            foreach (var category in inventoryItems)
+            {
+                foreach (var slot in category.ItemSlots)
+                {
+                    string currItemName = StringUtils.NoSpacesAndLowerCaseString(slot.Item.Name);
+                    string nameToSearch = StringUtils.NoSpacesAndLowerCaseString(name);
+
+                    if (currItemName.Contains(nameToSearch))
+                    {
+                        return slot.Item;
+                    }
+                }
+            }
+
+            return null;
+        }
+
         private bool ReachedWeightLimit(float itemWeight, ref int addAmount)
         {
             bool result = false;
@@ -201,37 +308,37 @@ namespace ModdableInventory
             return result;
         }
 
-        private void AddNewItemSlot(ref ItemSlot currSlot, int categoryID, int itemID, int itemAmount)
+        private void AddNewItemSlot(ref InventorySlot currSlot, int categoryID, int itemID, int itemAmount)
         {
             Item item = GetItemFromDatabase(categoryID, itemID);
 
-            inventory[categoryID].ItemSlots.Add(currSlot = new ItemSlot(item, Mathf.Min(itemAmount, item.StackLimit)));
+            inventoryItems[categoryID].ItemSlots.Add(currSlot = new InventorySlot(item, Mathf.Min(itemAmount, item.StackLimit)));
             inventoryWeight += currSlot.Weight;
         }
 
-        private void UpdateItemSlot(ItemSlot currSlot, int newAmount)
+        private void UpdateItemSlot(InventorySlot currSlot, int newAmount)
         {
             inventoryWeight -= currSlot.Weight;
-            currSlot.Amount = newAmount;
+            currSlot.SetAmount(newAmount);
             inventoryWeight += currSlot.Weight;
         }
 
-        private void RemoveItemSlot(ItemSlot currSlot, int categoryID)
+        private void RemoveItemSlot(InventorySlot currSlot, int categoryID)
         {
             inventoryWeight -= currSlot.Weight;
-            inventory[categoryID].ItemSlots.Remove(currSlot);
+            inventoryItems[categoryID].ItemSlots.Remove(currSlot);
         }
 
         // this makes it so that items are added/removed from the last slot first.
-        private ItemSlot GetLastSlotWithItem(int categoryID, int itemID)
+        private InventorySlot GetLastSlotWithItem(int categoryID, int itemID)
         {
             Item item = GetItemFromDatabase(categoryID, itemID);
 
             sorter.SortInventoryByAmount();
 
-            for (int i = inventory[categoryID].ItemSlots.Count - 1; i >= 0; i--)
+            for (int i = inventoryItems[categoryID].ItemSlots.Count - 1; i >= 0; i--)
             {
-                ItemSlot currSlot = inventory[categoryID].ItemSlots[i];
+                InventorySlot currSlot = inventoryItems[categoryID].ItemSlots[i];
 
                 if (currSlot.Item.Name.Equals(item.Name))
                 {

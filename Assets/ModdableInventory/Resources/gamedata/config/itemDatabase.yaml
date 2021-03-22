@@ -5,7 +5,7 @@
 ## General Settings ##
 # extractSpriteData: {bool} 
   # should the game extract all internal sprites to "<game_folder>/gamedata/sprites/items/" on start?
-  # extracted sprites does NOT overwrite existing sprites
+  # extracted sprites do NOT overwrite existing sprites
 extractSpriteData: false
 
 ## Item Categories ##

@@ -4,7 +4,7 @@ namespace ModdableInventory
 {
     public class ItemCategory
     {
-        public ItemCategory(string typeName, string categoryName, List<ItemSlot> slots)
+        public ItemCategory(string typeName, string categoryName, List<InventorySlot> slots)
         {
             TypeName = typeName;
             CategoryName = categoryName;
@@ -13,6 +13,6 @@ namespace ModdableInventory
 
         public string TypeName { get; }
         public string CategoryName { get; }
-        public List<ItemSlot> ItemSlots { get; set; }
+        public List<InventorySlot> ItemSlots { get; set; }
     }
 }

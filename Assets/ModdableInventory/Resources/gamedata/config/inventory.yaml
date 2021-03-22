@@ -9,3 +9,19 @@
 
 limitedByWeight: false
 weightCapacity: 0
+
+## Equipment Slots ##
+# these define the slots in which items can be equipped
+# each slot has the following parameters:
+# name: {string}
+  # the in-game name of the item slot
+# itemType: {string}
+  # what <ItemClass> can be equipped in this slot (see itemDatabase.yaml)
+
+equipmentSlots:
+  Torso:
+    name: "Torso"
+    itemType: "Armor"
+  Hands:
+    name: "Hands"
+    itemType: "Weapon"

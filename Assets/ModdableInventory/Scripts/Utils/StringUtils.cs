@@ -1,9 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEditor;
 using System.Globalization;
-using System.IO;
 
 namespace ModdableInventory.Utils
 {
@@ -28,31 +23,6 @@ namespace ModdableInventory.Utils
             }
 
             return str.Contains(name);
-        }
-    }
-
-    public static class IOUtils
-    {
-        public static void WriteFileToDirectory(string filePath, byte[] fileData)
-        {
-            Directory.CreateDirectory(Path.GetDirectoryName(filePath));
-
-            if (!File.Exists(filePath)) // make sure not to overwrite
-            {
-                File.WriteAllBytes(filePath, fileData);
-            }
-        }
-    }
-
-    public static class EditorUtils
-    {
-        public static bool IsUnityEditor()
-        {
-            #if UNITY_EDITOR
-                return true;
-            #else
-                return false;
-            #endif
         }
     }
 }

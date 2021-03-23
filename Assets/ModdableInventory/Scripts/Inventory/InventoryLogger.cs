@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using ModdableInventory.Utils;
+using System;
 
 namespace ModdableInventory
 {
@@ -9,45 +10,49 @@ namespace ModdableInventory
     public class InventoryLogger : MonoBehaviour
     {
         [Min(0)][SerializeField] private int decimalPlaces = 2;
-        // TODO: Example: remove this, use an example scene instead
+        // TODO: UI: remove this, use a demo scene instead
         [Min(0)][SerializeField] private bool testExampleInventory = true; 
 
         private Inventory inventory;
+
+        // TODO: UI: remove this, use a demo scene instead
+        public event EventHandler InventoryPopulated;
 
         private void Awake()
         {
             inventory = GetComponent<Inventory>();
 
-            inventory.onInventoryInitialized += InitializeInventoryLogger;
+            // TODO: UI: remove this, use a demo scene instead
+            inventory.InventoryInitialized += InitializeInventoryLogger;
         }
 
-        private void InitializeInventoryLogger()
+        // TODO: UI: remove this, use a demo scene instead
+        private void InitializeInventoryLogger(object sender, EventArgs e)
         {
-            inventory.onInventoryInitialized -= InitializeInventoryLogger;
+            inventory.InventoryInitialized -= InitializeInventoryLogger;
 
-            Debug.Log("########## INVENTORY LOG ##########");
+            Debug.Log("######## INVENTORY LOG START ########");
 
             if (testExampleInventory) Test_PopulateInventory();
-            if (testExampleInventory) Test_EquipItems();
 
-            LogEquippedItems();
             LogInventory();
         }
 
-        private void LogInventory()
+        public void LogInventory()
         {
             var limitedByWeight = inventory.LimitedByWeight;
             var weightCapacity = inventory.WeightCapacity;
             var inventoryWeight = inventory.CurrentWeight;
 
-            Debug.Log($"##### Inventory #####");
+            Debug.Log($"#### Inventory ####");
+            Debug.Log($"Gold: {inventory.Money} ");
             if (limitedByWeight)
             {
                 Debug.Log($"[Weight: {StringUtils.FloatToString(inventoryWeight, decimalPlaces)}/{StringUtils.FloatToString(weightCapacity, decimalPlaces)}]");
             }
             for (int i = 0 ; i < inventory.InventoryItems.Count; i++)
             {
-                Debug.Log($"=== {inventory.InventoryItems[i].CategoryName} ===");
+                Debug.Log($"[{inventory.InventoryItems[i].CategoryName}]");
                 foreach (InventorySlot slot in inventory.InventoryItems[i].ItemSlots)
                 {
                     Debug.Log($"x{slot.Amount} {slot.Item.Name}");
@@ -55,46 +60,18 @@ namespace ModdableInventory
             }
         }
 
-        private void LogEquippedItems()
-        {
-            Debug.Log($"##### Equipment #####");
-            foreach (var slot in inventory.EquippedItems)
-            {
-                Debug.Log($"> {slot.SlotName} ({slot.TypeName}):");
-                if (slot.Item != null)
-                {
-                    Debug.Log($"    {slot.Item.Name}");
-                }
-                else
-                {
-                    Debug.Log($"    <empty>");
-                }
-            }
-        }
-
         private void Test_PopulateInventory()
         {
+            inventory.Money += 500;
+
             inventory.AddItemToInventory("shortsword", 3);
             inventory.AddItemToInventory("magic sword", 1);
             inventory.AddItemToInventory("leather tunic", 3);
             inventory.AddItemToInventory("bookofknowledge", 1);
 
-            inventory.Sorter.SortInventoryByNameAlphabetically();
-        }
+            inventory.SortCategoriesByItemName();
 
-        private void Test_EquipItems()
-        {
-            Debug.Log("===== Book of Knowledge Equipped =====");
-            inventory.EquipItem("book of knowledge");
-
-            Debug.Log("===== Short Sword Equipped =====");
-            inventory.EquipItem("shortsword");
-
-            LogEquippedItems();
-            LogInventory();
-
-            Debug.Log("===== Short Sword Unequiped =====");
-            inventory.UnequipItem("shortsword");
+            InventoryPopulated?.Invoke(this, EventArgs.Empty);
         }
     } 
 }

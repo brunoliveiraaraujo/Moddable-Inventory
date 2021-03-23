@@ -309,9 +309,11 @@ GameObject:
   m_Component:
   - component: {fileID: 1237307642}
   - component: {fileID: 1237307643}
-  - component: {fileID: 1237307644}
   - component: {fileID: 1237307646}
+  - component: {fileID: 1237307648}
+  - component: {fileID: 1237307644}
   - component: {fileID: 1237307645}
+  - component: {fileID: 1237307647}
   m_Layer: 0
   m_Name: Inventory
   m_TagString: Untagged
@@ -345,7 +347,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 67c432925390bbf408dc390ee22d423c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  extractAllItemsSprites: 1
 --- !u!114 &1237307644
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -372,7 +373,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   decimalPlaces: 2
-  TEMP_InventoryMockTest: 1
+  testExampleInventory: 1
 --- !u!114 &1237307646
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -383,6 +384,31 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 7b73938109fc65d45a1c0004a24bc371, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1237307647
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1237307641}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0fd965c92c866a146929c5c7bfb74bc4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  testExampleEquipment: 1
+--- !u!114 &1237307648
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1237307641}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7597649b72f4dcb418e36643e1d69185, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!850595691 &1920194320

@@ -7,19 +7,19 @@ using System.IO;
 using YamlDotNet.RepresentationModel;
 using System.Text;
 using ModdableInventory.Utils;
+using ModdableInventory.Items;
 
 namespace ModdableInventory
 {
     public class ItemDatabase : MonoBehaviour
     {
-        private const string ITEMS_NAMESPACE = "ModdableInventory.Items";
-        private const string ITEMS_YAML_PATH = "gamedata/config/itemDatabase.yaml";
+        private const string ITEM_DATABASE_YAML_PATH = "gamedata/config/itemDatabase.yaml";
 
         private List<ItemCategory> items = new List<ItemCategory>();
         
         public ReadOnlyCollection<ItemCategory> Items => items.AsReadOnly();
         
-        public Action onDatabaseInitialized;
+        public event EventHandler DatabaseInitialized;
         
         private void Start() 
         {
@@ -28,35 +28,15 @@ namespace ModdableInventory
 
         private void InitializeDatabase()
         {
-            string internalDatabaseYAML = Resources.Load<TextAsset>(Path.ChangeExtension(ITEMS_YAML_PATH, null)).text;
-            StringReader input = null;
+            string internalDatabaseYAML = Resources.Load<TextAsset>(Path.ChangeExtension(ITEM_DATABASE_YAML_PATH, null)).text;
 
-            if (EditorUtils.IsUnityEditor())
-            {    
-                input = new StringReader(internalDatabaseYAML);
-            }
-            else
-            {    
-                if (File.Exists(ITEMS_YAML_PATH))
-                {
-                    input = new StringReader(File.ReadAllText(ITEMS_YAML_PATH));
-                }
-                else
-                {
-                    input = new StringReader(internalDatabaseYAML);
-                    IOUtils.WriteFileToDirectory(ITEMS_YAML_PATH, Encoding.ASCII.GetBytes((internalDatabaseYAML)));
-                }
-            }
+            ParseDatabase(IOUtils.ReadOrMakeYAMLFile(internalDatabaseYAML, ITEM_DATABASE_YAML_PATH));
 
-            items = ParseDatabase(input);
-
-            onDatabaseInitialized?.Invoke();
+            DatabaseInitialized?.Invoke(this, EventArgs.Empty);
         }
 
-        private List<ItemCategory> ParseDatabase(StringReader input)
+        private void ParseDatabase(StringReader input)
         {
-            List<ItemCategory> database = new List<ItemCategory>();
-
             var yaml = new YamlStream();
             yaml.Load(input);
 
@@ -69,20 +49,21 @@ namespace ModdableInventory
                 {
                     if (bool.Parse(topLevelNode.Value.ToString()))
                     {
-                        onDatabaseInitialized += ExtractAllItemsSprites;
+                        DatabaseInitialized += ExtractAllItemsSprites;
                     }
                 }
                 else
                 {
-                    ParseItemCategories(topLevelNode, database, categoryID);
+                    ParseItemCategories(topLevelNode, categoryID);
                     categoryID++;
                 }
             }
-            return database;
         }
 
-        private void ExtractAllItemsSprites()
+        private void ExtractAllItemsSprites(object sender, EventArgs e)
         {
+            DatabaseInitialized -= ExtractAllItemsSprites;
+
             foreach (var category in items)
             {
                 foreach (var slot in category.ItemSlots)
@@ -92,7 +73,7 @@ namespace ModdableInventory
             }
         }
 
-        private void ParseItemCategories(KeyValuePair<YamlNode, YamlNode> topLevelNode, List<ItemCategory> database, int categoryID)
+        private void ParseItemCategories(KeyValuePair<YamlNode, YamlNode> topLevelNode, int categoryID)
         {
             string typeName = topLevelNode.Key.ToString();
 
@@ -100,19 +81,19 @@ namespace ModdableInventory
             {
                 if (entry.Key.ToString().Equals("categoryName"))
                 {
-                    database.Add(new ItemCategory(typeName, entry.Value.ToString(), new List<InventorySlot>()));
+                    items.Add(new ItemCategory(typeName, entry.Value.ToString(), new List<InventorySlot>()));
                 }
                 else if (entry.Key.ToString().Equals("items"))
                 {
                     foreach (var item in ((YamlMappingNode)entry.Value).Children)
                     {
-                        ParseItem(item, database, typeName, categoryID);
+                        ParseItem(item, typeName, categoryID);
                     }
                 }
             }
         }
 
-        private void ParseItem(KeyValuePair<YamlNode, YamlNode> itemNode, List<ItemCategory> database, string typeName, int categoryID)
+        private void ParseItem(KeyValuePair<YamlNode, YamlNode> itemNode, string typeName, int categoryID)
         {
             string idName = itemNode.Key.ToString();
 
@@ -127,12 +108,13 @@ namespace ModdableInventory
             }
             catch (InvalidCastException) {} // loading parameters is optional, they have defaults
 
-            Type itemType = Type.GetType(ITEMS_NAMESPACE + "." + typeName, true);
+            string itemsNamespace = typeof(Item).Namespace;
+            Type itemType = Type.GetType(itemsNamespace + "." + typeName, true);
             Item instance = (Item) Activator.CreateInstance(itemType);
 
             instance.Initialize(idName, itemData);
             
-            database[categoryID].ItemSlots.Add(new InventorySlot(instance));
+            items[categoryID].ItemSlots.Add(new InventorySlot(instance));
         }
     }
 }

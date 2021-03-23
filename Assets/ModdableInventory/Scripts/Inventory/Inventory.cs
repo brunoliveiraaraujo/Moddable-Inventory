@@ -8,6 +8,8 @@ using System.IO;
 using System.Text;
 using YamlDotNet.RepresentationModel;
 using System.Globalization;
+using System.Linq;
+using ModdableInventory.Items;
 
 namespace ModdableInventory
 {
@@ -19,63 +21,50 @@ namespace ModdableInventory
         private bool limitedByWeight = false;
         private float weightCapacity = 0;
         private float currentWeight = 0;
-
+        private int money = 0;
+    
         private ItemDatabase database;
         private List<ItemCategory> inventoryItems = new List<ItemCategory>();
-        private List<EquipmentSlot> equippedItems = new List<EquipmentSlot>();
-        private InventorySorter sorter;
 
-        public ReadOnlyCollection<ItemCategory> InventoryItems => inventoryItems.AsReadOnly();
-        public ReadOnlyCollection<EquipmentSlot> EquippedItems => equippedItems.AsReadOnly();
         public bool LimitedByWeight => limitedByWeight;
         public float WeightCapacity => weightCapacity;
-        public float CurrentWeight => currentWeight;
-        public InventorySorter Sorter => sorter;
+        public float CurrentWeight 
+        { 
+            get { return Mathf.Max(currentWeight, 0); } 
+            set { currentWeight = value; } 
+        }
+        public int Money 
+        { 
+            get { return Mathf.Max(money, 0); } 
+            set { money = value; } 
+        }
 
-        public Action onInventoryInitialized;
-        public Action slotFull;
-        public Action inventoryFull;
+        public ReadOnlyCollection<ItemCategory> InventoryItems => inventoryItems.AsReadOnly();
+
+        public event EventHandler InventoryInitialized;
+        public event EventHandler InventoryFull;
 
         private void Awake() 
         {
             database = GetComponent<ItemDatabase>();
-            sorter = new InventorySorter(inventoryItems);
 
-            database.onDatabaseInitialized += InitializeInventory;
+            database.DatabaseInitialized += InitializeInventory;
         }
 
-        private void InitializeInventory()
+        private void InitializeInventory(object sender, EventArgs e)
         {
-            database.onDatabaseInitialized -= InitializeInventory;
+            database.DatabaseInitialized -= InitializeInventory;
 
             string internalInventoryYAML = Resources.Load<TextAsset>(Path.ChangeExtension(INVENTORY_YAML_PATH, null)).text;
-            StringReader input = null;
 
-            if (EditorUtils.IsUnityEditor())
-            {
-                input = new StringReader(internalInventoryYAML);
-            }
-            else
-            {
-                if (File.Exists(INVENTORY_YAML_PATH))
-                {
-                    input = new StringReader(File.ReadAllText(INVENTORY_YAML_PATH));
-                }
-                else
-                {
-                    input = new StringReader(internalInventoryYAML);
-                    IOUtils.WriteFileToDirectory(INVENTORY_YAML_PATH, Encoding.ASCII.GetBytes(internalInventoryYAML));
-                }
-            }
-
-            ParseInventory(input);
+            ParseInventory(IOUtils.ReadOrMakeYAMLFile(internalInventoryYAML, INVENTORY_YAML_PATH));
 
             for (int i = 0; i < database.Items.Count; i++)
             {
                 inventoryItems.Add(new ItemCategory(database.Items[i].TypeName, database.Items[i].CategoryName, new List<InventorySlot>()));
             }
 
-            onInventoryInitialized?.Invoke();
+            InventoryInitialized?.Invoke(this, EventArgs.Empty);
         }
 
         private void ParseInventory(StringReader input)
@@ -98,36 +87,6 @@ namespace ModdableInventory
                 {
                     weightCapacity = float.Parse(valueName.ToString(), CultureInfo.InvariantCulture);
                 }
-                else if (keyName.Equals("equipmentSlots"))
-                {
-                    ParseEquipmentSlots(topLevelNode);
-                }
-            }
-        }
-
-        private void ParseEquipmentSlots(KeyValuePair<YamlNode, YamlNode> topLevelNode)
-        {
-            foreach (var slot in ((YamlMappingNode)topLevelNode.Value).Children)
-            {
-                string slotName = null;
-                string typeName = null;
-
-                foreach (var parameter in ((YamlMappingNode)slot.Value).Children)
-                {
-                    string keyName = parameter.Key.ToString();
-                    string valueName = parameter.Value.ToString();
-
-                    if (keyName.Equals("name"))
-                    {
-                        slotName = valueName;
-                    }
-                    else if (keyName.Equals("itemType"))
-                    {
-                        typeName = valueName;
-                    }
-                }
-
-                equippedItems.Add(new EquipmentSlot(slotName, typeName));
             }
         }
 
@@ -158,7 +117,7 @@ namespace ModdableInventory
 
             if (limitedByWeight && ReachedWeightLimit(item.Weight, ref addAmount))
             {
-                inventoryFull?.Invoke();
+                InventoryFull?.Invoke(this, EventArgs.Empty);
 
                 if (addAmount == 0) return;
             }
@@ -213,88 +172,61 @@ namespace ModdableInventory
             }
         }
 
-        public void EquipItem(string itemName)
+        // TODO: UI: (perhaps) make method(s) to sort an inventory UI where items of all categories are displayed on one list
+        public void SortCategoriesByItemName()
         {
-            Item item = GetItemFromInventory(itemName);
-
-            if (item != null)
-            {
-                foreach (var slot in equippedItems)
-                {
-                    if (item.GetType().Name.Equals(slot.TypeName) || item.GetType().BaseType.Name.Equals(slot.TypeName))
-                    {
-                        if (slot.Item == null)
-                        {
-                            slot.Item = item;
-                            RemoveItemFromInventory(itemName);
-                            currentWeight += item.Weight;
-                            return;
-                        }
-                        else
-                        {
-                            continue;
-                        }
-                    }
-                }
-            }
-        }
-
-        public void UnequipItem(string itemName)
-        {
-            Item item = GetItemFromEquipped(itemName);
-
-            if (item != null)
-            {
-                foreach (var slot in equippedItems)
-                {
-                    if (item.GetType().Name.Equals(slot.TypeName) || item.GetType().BaseType.Name.Equals(slot.TypeName))
-                    {
-                        if (slot.Item != null)
-                        {
-                            slot.Item = null;
-                            currentWeight -= item.Weight;
-                            AddItemToInventory(itemName);
-                            return;
-                        }
-                        else
-                        {
-                             continue;
-                        }
-                    }
-                }
-            }
-        }
-
-        private Item GetItemFromEquipped(string name)
-        {
-            foreach (var slot in equippedItems)
-            {
-                if (slot.Item != null)
-                {
-                    if (StringUtils.StringContainsName(slot.Item.Name, name))
-                    {
-                        return slot.Item;
-                    }
-                }
-            }
-
-            return null;
-        }
-
-        private Item GetItemFromInventory(string name)
-        {
+            SortCategoriesByItemAmount();
             foreach (var category in inventoryItems)
             {
-                foreach (var slot in category.ItemSlots)
+                category.ItemSlots = category.ItemSlots
+                    .OrderBy(slot => slot.Item.Name)
+                    .ToList();
+            }
+        }
+
+        public void SortCategoriesByItemCost(bool descending = true)
+        {
+            SortCategoriesByItemAmount();
+            if (descending)
+            {
+                foreach (var category in inventoryItems)
                 {
-                    if (StringUtils.StringContainsName(slot.Item.Name, name))
-                    {
-                        return slot.Item;
-                    }
+                    category.ItemSlots = category.ItemSlots
+                        .OrderByDescending(slot => slot.Item.Cost)
+                        .ToList();
+                } 
+            }
+            else
+            {
+                foreach (var category in inventoryItems)
+                {
+                    category.ItemSlots = category.ItemSlots
+                        .OrderBy(slot => slot.Item.Cost)
+                        .ToList();
+                } 
+            }
+        }
+
+        public void SortCategoriesByItemAmount(bool descending = true)
+        {
+            if (descending)
+            {
+                foreach (var category in inventoryItems)
+                {
+                    category.ItemSlots = category.ItemSlots
+                        .OrderByDescending(slot => slot.Amount)
+                        .ToList();
                 }
             }
-
-            return null;
+            else
+            {
+                foreach (var category in inventoryItems)
+                {
+                    category.ItemSlots = category.ItemSlots
+                        .OrderBy(slot => slot.Amount)
+                        .ToList();
+                }
+            }
         }
 
         private bool ReachedWeightLimit(float itemWeight, ref int addAmount)
@@ -342,7 +274,7 @@ namespace ModdableInventory
         {
             Item item = GetItemFromDatabase(categoryID, itemID);
 
-            sorter.SortInventoryByAmount();
+            SortCategoriesByItemAmount();
 
             for (int i = inventoryItems[categoryID].ItemSlots.Count - 1; i >= 0; i--)
             {

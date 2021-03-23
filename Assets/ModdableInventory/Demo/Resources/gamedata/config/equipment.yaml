@@ -1,16 +1,5 @@
-##### inventory.yaml #####
-# This file contains configuration data for the player's inventory.
-
-# Parameters used in inventory.yaml:
-# limitedByWeight: {bool, default=false} 
-  # should the inventory be limited by the weight of it's items
-# weightCapacity: {float, default=0} 
-  # the maximum amount of weight this inventory can hold
-
-limitedByWeight: false
-weightCapacity: 0
-
-## Equipment Slots ##
+##### equipment.yaml #####
+## Equipment Settings ##
 # these define the slots in which items can be equipped
 # each slot has the following parameters:
 # name: {string}
@@ -18,7 +7,6 @@ weightCapacity: 0
 # itemType: {string}
   # what <ItemClass> can be equipped in this slot (see itemDatabase.yaml)
   # use "Item" for the slot to work with any item (since it's the base class for all items)
-
 equipmentSlots:
   Torso:
     name: "Torso"

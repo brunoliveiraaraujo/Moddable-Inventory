@@ -1,5 +1,6 @@
 using UnityEngine;
 using ModdableInventory.Utils;
+using System;
 
 namespace ModdableInventory
 {
@@ -14,19 +15,19 @@ namespace ModdableInventory
         {
             database = GetComponent<ItemDatabase>();
 
-            database.onDatabaseInitialized += DebugLogDatabase;
+            database.DatabaseInitialized += LogItemDatabase;
         }
 
-        private void DebugLogDatabase()
+        public void LogItemDatabase(object sender, EventArgs e)
         {
-            this.database.onDatabaseInitialized -= DebugLogDatabase;
+            this.database.DatabaseInitialized -= LogItemDatabase;
 
             var items = this.database.Items;
 
-            Debug.Log($"########## ITEM DATABASE ##########");
+            Debug.Log($"########## ITEM DATABASE LOG ##########");
             foreach (var category in items)
             {
-                Debug.Log($"=== {category.CategoryName} ===");
+                Debug.Log($"[{category.CategoryName}]");
                 for (int i = 0; i < category.ItemSlots.Count; i++)
                 {
                     category.ItemSlots[i].Item.LogItem(decimalPlaces);

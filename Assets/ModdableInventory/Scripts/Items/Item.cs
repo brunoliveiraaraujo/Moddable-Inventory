@@ -5,9 +5,9 @@ using System.IO;
 using UnityEngine;
 using ModdableInventory.Utils;
 
-namespace ModdableInventory
+namespace ModdableInventory.Items
 {
-    public class Item
+    public abstract class Item
     {
         private const string SPRITES_FOLDER_PATH = "gamedata/sprites/items/";
 

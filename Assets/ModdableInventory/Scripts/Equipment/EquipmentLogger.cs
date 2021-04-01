@@ -69,7 +69,7 @@ namespace ModdableInventory
             Debug.Log($"#### Equipment ####");
             foreach (var slot in equipment.EquippedItems)
             {
-                Debug.Log($"[{slot.SlotName} ({slot.TypeName})]");
+                Debug.Log($"[{slot.SlotName} ({slot.ItemTypeName})]");
                 if (slot.Item != null)
                 {
                     Debug.Log($"    {slot.Item.Name}");
@@ -81,10 +81,11 @@ namespace ModdableInventory
             }
         }
 
+        // TODO: UI: remove this, use a demo scene instead
         private void Test_EquipItems()
         {
-            Debug.Log("===== Book of Knowledge Equipped =====");
-            equipment.EquipItem("book of knowledge");
+            Debug.Log("===== Magic Sword Equipped =====");
+            equipment.EquipItem("magicsword");
 
             Debug.Log("===== Short Sword Equipped =====");
             equipment.EquipItem("shortsword");

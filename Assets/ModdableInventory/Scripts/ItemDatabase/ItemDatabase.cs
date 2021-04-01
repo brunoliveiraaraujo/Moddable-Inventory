@@ -7,18 +7,19 @@ using System.IO;
 using YamlDotNet.RepresentationModel;
 using System.Text;
 using ModdableInventory.Utils;
-using ModdableInventory.Items;
 
 namespace ModdableInventory
 {
     public class ItemDatabase : MonoBehaviour
     {
+        private const string ITEMS_NAMESPACE = "";
         private const string ITEM_DATABASE_YAML_PATH = "gamedata/config/itemDatabase.yaml";
 
         private List<ItemCategory> items = new List<ItemCategory>();
         
         public ReadOnlyCollection<ItemCategory> Items => items.AsReadOnly();
         
+        // TODO: Events: all methods that subscribe to an event should be called OnEventName
         public event EventHandler DatabaseInitialized;
         
         private void Start() 
@@ -81,7 +82,7 @@ namespace ModdableInventory
             {
                 if (entry.Key.ToString().Equals("categoryName"))
                 {
-                    items.Add(new ItemCategory(typeName, entry.Value.ToString(), new List<InventorySlot>()));
+                    items.Add(new ItemCategory(typeName, entry.Value.ToString(), new List<ItemSlot>()));
                 }
                 else if (entry.Key.ToString().Equals("items"))
                 {
@@ -108,13 +109,12 @@ namespace ModdableInventory
             }
             catch (InvalidCastException) {} // loading parameters is optional, they have defaults
 
-            string itemsNamespace = typeof(Item).Namespace;
-            Type itemType = Type.GetType(itemsNamespace + "." + typeName, true);
+            Type itemType = Type.GetType(ITEMS_NAMESPACE + "." + typeName, true);
             Item instance = (Item) Activator.CreateInstance(itemType);
 
             instance.Initialize(idName, itemData);
             
-            items[categoryID].ItemSlots.Add(new InventorySlot(instance));
+            items[categoryID].ItemSlots.Add(new ItemSlot(instance));
         }
     }
 }

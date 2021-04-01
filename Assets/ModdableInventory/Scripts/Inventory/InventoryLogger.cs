@@ -53,13 +53,14 @@ namespace ModdableInventory
             for (int i = 0 ; i < inventory.InventoryItems.Count; i++)
             {
                 Debug.Log($"[{inventory.InventoryItems[i].CategoryName}]");
-                foreach (InventorySlot slot in inventory.InventoryItems[i].ItemSlots)
+                foreach (ItemSlot slot in inventory.InventoryItems[i].ItemSlots)
                 {
                     Debug.Log($"x{slot.Amount} {slot.Item.Name}");
                 }
             }
         }
 
+        // TODO: UI: remove this, use a demo scene instead
         private void Test_PopulateInventory()
         {
             inventory.Money += 500;
@@ -68,8 +69,6 @@ namespace ModdableInventory
             inventory.AddItemToInventory("magic sword", 1);
             inventory.AddItemToInventory("leather tunic", 3);
             inventory.AddItemToInventory("bookofknowledge", 1);
-
-            inventory.SortCategoriesByItemName();
 
             InventoryPopulated?.Invoke(this, EventArgs.Empty);
         }

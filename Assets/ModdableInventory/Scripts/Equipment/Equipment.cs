@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Text;
-using ModdableInventory.Items;
 using ModdableInventory.Utils;
 using UnityEngine;
 using YamlDotNet.RepresentationModel;
@@ -89,56 +88,76 @@ namespace ModdableInventory
             }
         }
 
-        public void EquipItem(string itemName)
+        public void EquipItem(string itemName, int slotID = -1)
         {
             Item item = GetItemFromInventory(itemName, inventory.InventoryItems);
 
             if (item != null)
             {
-                foreach (var slot in equippedItems)
+                if (slotID < 0)
                 {
-                    if (item.GetType().Name.Equals(slot.TypeName) || item.GetType().BaseType.Name.Equals(slot.TypeName))
+                    foreach (var slot in equippedItems)
                     {
-                        if (slot.Item == null)
-                        {
-                            slot.Item = item;
-                            inventory.RemoveItemFromInventory(itemName);
-                            inventory.CurrentWeight += item.Weight;
-                            return;
-                        }
-                        else
-                        {
-                            continue;
-                        }
+                        bool equipped = EquipItemInSlot(item, slot);
+                        if (equipped) return;
                     }
+                }
+                else
+                {
+                    EquipItemInSlot(item, equippedItems[slotID]);
                 }
             }
         }
 
-        public void UnequipItem(string itemName)
+        private bool EquipItemInSlot(Item item, EquipmentSlot slot)
+        {
+            if (item.GetType().Name.Equals(slot.ItemTypeName) || item.GetType().BaseType.Name.Equals(slot.ItemTypeName))
+            {
+                if (slot.Item == null)
+                {
+                    slot.Item = item;
+                    inventory.RemoveItemFromInventory(item.IDName);
+                    inventory.CurrentWeight += item.Weight;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public void UnequipItem(string itemName, int slotID = -1)
         {
             Item item = GetItemFromEquipped(itemName);
 
             if (item != null)
             {
-                foreach (var slot in equippedItems)
+                if (slotID < 0)
                 {
-                    if (item.GetType().Name.Equals(slot.TypeName) || item.GetType().BaseType.Name.Equals(slot.TypeName))
+                    foreach (var slot in equippedItems)
                     {
-                        if (slot.Item != null)
-                        {
-                            slot.Item = null;
-                            inventory.CurrentWeight -= item.Weight;
-                            inventory.AddItemToInventory(itemName);
-                            return;
-                        }
-                        else
-                        {
-                             continue;
-                        }
+                        bool unequipped = UnequipItemInSlot(item, slot);
+                        if (unequipped) return;
                     }
                 }
+                else
+                {
+                    UnequipItemInSlot(item, equippedItems[slotID]);
+                }
             }
+        }
+
+        private bool UnequipItemInSlot(Item item, EquipmentSlot slot)
+        {
+            if (item.GetType().Name.Equals(slot.ItemTypeName) || item.GetType().BaseType.Name.Equals(slot.ItemTypeName))
+            {
+                if (slot.Item != null && slot.Item.IDName.Equals(item.IDName))
+                {
+                    slot.Item = null;
+                    inventory.CurrentWeight -= item.Weight;
+                    inventory.AddItemToInventory(item.IDName);
+                    return true;
+                }
+            }
+            return false;
         }
 
         private Item GetItemFromEquipped(string name)
@@ -147,7 +166,7 @@ namespace ModdableInventory
             {
                 if (slot.Item != null)
                 {
-                    if (StringUtils.StringContainsName(slot.Item.Name, name))
+                    if (StringUtils.StringContainsName(slot.Item.IDName, name))
                     {
                         return slot.Item;
                     }
@@ -163,7 +182,7 @@ namespace ModdableInventory
             {
                 foreach (var slot in category.ItemSlots)
                 {
-                    if (StringUtils.StringContainsName(slot.Item.Name, name))
+                    if (StringUtils.StringContainsName(slot.Item.IDName, name))
                     {
                         return slot.Item;
                     }

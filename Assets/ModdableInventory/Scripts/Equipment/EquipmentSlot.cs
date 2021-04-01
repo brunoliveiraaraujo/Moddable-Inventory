@@ -1,5 +1,4 @@
 using System;
-using ModdableInventory.Items;
 using UnityEngine;
 
 namespace ModdableInventory
@@ -7,16 +6,16 @@ namespace ModdableInventory
     public class EquipmentSlot
     {
         private string slotName;
-        private string typeName;
+        private string itemTypeName;
 
-        public EquipmentSlot(string slotName, string typeName)
+        public EquipmentSlot(string slotName, string itemTypeName)
         {
             this.slotName = slotName;
-            this.typeName = typeName;
+            this.itemTypeName = itemTypeName;
         }
 
         public string SlotName => slotName;
-        public string TypeName => typeName;
+        public string ItemTypeName => itemTypeName;
         public Item Item { get; set; } = null;
         
     }

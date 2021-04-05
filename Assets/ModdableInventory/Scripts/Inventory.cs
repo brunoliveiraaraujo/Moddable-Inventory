@@ -60,9 +60,9 @@ namespace ModdableInventory
 
             ParseInventory(IOUtils.ReadOrMakeYAMLFile(internalInventoryYAML, INVENTORY_YAML_PATH));
 
-            for (int i = 0; i < database.Items.Count; i++)
+            for (int i = 0; i < database.ItemCategories.Count; i++)
             {
-                inventoryItems.Add(new ItemCategory(database.Items[i].ItemTypeName, database.Items[i].CategoryName, new List<ItemSlot>()));
+                inventoryItems.Add(new ItemCategory(database.ItemCategories[i].ItemTypeName, database.ItemCategories[i].CategoryName, new List<ItemSlot>()));
             }
 
             InventoryInitialized?.Invoke(this, EventArgs.Empty);
@@ -93,16 +93,27 @@ namespace ModdableInventory
 
         // adds first Item found in database which <item.Name> that contains <name>
         // (case and spacing are ignored)
-        public void AddItemToInventory(string name, int addAmount = 1)
+        public void AddItemToInventoryByName(string itemName, int addAmount = 1)
         {
             bool itemFound;
             int categoryID, itemID;
-            (itemFound, categoryID, itemID) = SearchItemInDatabase(name);
+            (itemFound, categoryID, itemID) = SearchItemInDatabaseByName(itemName);
 
-            if (itemFound) AddItemToInventory(categoryID, itemID, addAmount);
+            if (itemFound) AddItemToInventoryByID(categoryID, itemID, addAmount);
+            else throw new KeyNotFoundException($"Item {itemName} not found!");
         }
 
-        public void AddItemToInventory(int categoryID, int itemID, int addAmount = 1)
+        public void AddItemToInventoryByID(UniqueStringID stringID, int addAmount = 1)
+        {
+            bool itemFound;
+            int categoryID, itemID;
+            (itemFound, categoryID, itemID) = SearchItemInDatabaseByID(stringID);
+
+            if (itemFound) AddItemToInventoryByID(categoryID, itemID, addAmount);
+            else throw new KeyNotFoundException($"Item {stringID} not found!");    
+        }
+
+        public void AddItemToInventoryByID(int categoryID, int itemID, int addAmount = 1)
         {
             ItemType item = GetItemFromDatabase(categoryID, itemID);
             ItemSlot currSlot = GetLastSlotWithItem(categoryID, itemID);
@@ -133,16 +144,27 @@ namespace ModdableInventory
             }            
         }
 
-        public void RemoveItemFromInventory(string name, int subAmount = 1)
+        public void RemoveItemFromInventoryByName(string ItemName, int subAmount = 1)
         {
             bool itemFound;
             int categoryID, itemID;
-            (itemFound, categoryID, itemID) = SearchItemInDatabase(name);
+            (itemFound, categoryID, itemID) = SearchItemInDatabaseByName(ItemName);
 
-            if (itemFound) RemoveItemFromInventory(categoryID, itemID, subAmount);
+            if (itemFound) RemoveItemFromInventoryByID(categoryID, itemID, subAmount);
+            else throw new KeyNotFoundException($"Item {ItemName} not found!");
         }
 
-        public void RemoveItemFromInventory(int categoryID, int itemID, int subAmount = 1)
+        public void RemoveItemFromInventoryByID(UniqueStringID stringID, int subAmount = 1)
+        {
+            bool itemFound;
+            int categoryID, itemID;
+            (itemFound, categoryID, itemID) = SearchItemInDatabaseByID(stringID);
+
+            if (itemFound) RemoveItemFromInventoryByID(categoryID, itemID, subAmount);
+            else throw new KeyNotFoundException($"Item {stringID} not found!");
+        }
+
+        public void RemoveItemFromInventoryByID(int categoryID, int itemID, int subAmount = 1)
         {
             ItemType item = GetItemFromDatabase(categoryID, itemID);
             ItemSlot currSlot = GetLastSlotWithItem(categoryID, itemID);
@@ -231,18 +253,36 @@ namespace ModdableInventory
 
         private ItemType GetItemFromDatabase(int categoryID, int itemID)
         {
-            return database.Items[categoryID].ItemSlots[itemID].Item;
+            return database.ItemCategories[categoryID].ItemSlots[itemID].Item;
         }
 
-        private (bool itemFound, int categoryID, int itemID) SearchItemInDatabase (string nameToSearch)
+        private (bool itemFound, int categoryID, int itemID) SearchItemInDatabaseByName (string nameToSearch)
         {
-            for (int i = 0; i < database.Items.Count; i++)
+            for (int i = 0; i < database.ItemCategories.Count; i++)
             {
-                for (int j = 0; j < database.Items[i].ItemSlots.Count; j++)
+                for (int j = 0; j < database.ItemCategories[i].ItemSlots.Count; j++)
                 {
-                    string currItemName = database.Items[i].ItemSlots[j].Item.IDName;
+                    string currItemName = database.ItemCategories[i].ItemSlots[j].Item.Name;
 
                     if (StringUtils.StringContainsName(currItemName, nameToSearch))
+                    {
+                        return (true, i, j);
+                    }
+                }
+            }
+
+            return (false, -1, -1);
+        }
+
+        private (bool itemFound, int categoryID, int itemID) SearchItemInDatabaseByID (UniqueStringID uniqueIDToSearch)
+        {
+            for (int i = 0; i < database.ItemCategories.Count; i++)
+            {
+                for (int j = 0; j < database.ItemCategories[i].ItemSlots.Count; j++)
+                {
+                    string currItemID = database.ItemCategories[i].ItemSlots[j].Item.UniqueID.StringID;
+
+                    if (StringUtils.StringContainsName(currItemID, uniqueIDToSearch.StringID))
                     {
                         return (true, i, j);
                     }

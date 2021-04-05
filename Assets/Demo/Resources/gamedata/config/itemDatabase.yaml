@@ -13,7 +13,7 @@ extractSpriteData: false
 # <ItemType>:
 #   categoryName:<string> # the in-game name of this item category>
 #   items:
-#     <itemEntry>:        # unique identifier for this item  
+#     <stringID>:         # unique identifier for this item  
 #       <key>:<value>     # parameters used for a item of this type
 #       ...
 #     ...
@@ -35,12 +35,12 @@ extractSpriteData: false
 Weapon:
   categoryName: "Weapons"
   items:
-    ShortSword:
+    sword00:
       name: "Short Sword"
       cost: 50
       attack: 3
       weight: 3.5
-    MagicSword:
+    sword01:
       name: "Magic Sword"
       cost: 400
       attack: 9
@@ -51,7 +51,7 @@ Weapon:
 Armor:
   categoryName: "Armors"
   items:
-    LeatherTunic:
+    armor00:
       name: "Leather Tunic"
       cost: 30
       defense: 1
@@ -60,11 +60,11 @@ Armor:
 KeyItem:
   categoryName: "Key Items"
   items:
-    BookOfKnowledge:
+    keyitem00:
       name: "Book of Knowledge"
       stackLimit: 1
       multiStack: false
-    TrianglePiece:
+    keyitem01:
       name: "Triangle Piece"
       stackLimit: 3
       multiStack: false

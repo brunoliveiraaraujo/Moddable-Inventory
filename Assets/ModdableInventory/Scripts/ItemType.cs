@@ -13,7 +13,7 @@ namespace ModdableInventory
 
         private Dictionary<string, string> itemData;
 
-        public string IDName { get; private set; }
+        public UniqueStringID UniqueID { get; private set; }
         public string Name { get; private set; }
         public int Cost { get; private set; }
         public float Weight { get; private set; }
@@ -28,9 +28,9 @@ namespace ModdableInventory
             get => itemData; private set => itemData = value; 
         }
 
-        public void Initialize(string idName, Dictionary<string, string> itemData)
+        public void Initialize(UniqueStringID stringID, Dictionary<string, string> itemData)
         {
-            this.IDName = idName;
+            this.UniqueID = stringID;
             this.ItemData = itemData;
 
             LoadProperties();
@@ -72,7 +72,7 @@ namespace ModdableInventory
             Weight = SetProperty<float>("weight", 0);
             StackLimit = SetProperty<int>("stackLimit", 99);
             MultiStack = SetProperty<bool>("multiStack", true);
-            SpritePath = SetProperty("spritePath", IDName + ".png");
+            SpritePath = SetProperty("spritePath", UniqueID.StringID + ".png");
         }
 
         protected string SetProperty(string key, string defaultValue)
@@ -121,29 +121,29 @@ namespace ModdableInventory
         {
             Sprite sprite = null;
 
-            try { sprite = LoadGamedataSprite((SPRITES_FOLDER_PATH + SpritePath)); } catch {}
+            try { sprite = LoadExternalSprite(SPRITES_FOLDER_PATH, SpritePath); } catch {}
             if (sprite == null)
-                sprite = Resources.Load<Sprite>(SPRITES_FOLDER_PATH + Path.ChangeExtension(SpritePath, null));
+                sprite = LoadInternalSprite(SPRITES_FOLDER_PATH, Path.ChangeExtension(SpritePath, null));
             if (sprite == null)
-                sprite = Resources.Load<Sprite>(SPRITES_FOLDER_PATH + IDName);
+                sprite = LoadInternalSprite(SPRITES_FOLDER_PATH, UniqueID.StringID);
             if (sprite == null) 
-                sprite = Resources.Load<Sprite>(SPRITES_FOLDER_PATH + "generic_item");
+                sprite = LoadInternalSprite(SPRITES_FOLDER_PATH, "generic_item");
             if (sprite == null)
                 throw new NullReferenceException("No sprite found!");
 
             return sprite;
         }
 
-        private Sprite LoadGamedataSprite(string fullPath)
+        private Sprite LoadExternalSprite(string folderPath, string spritePath)
         {
             if (!EditorUtils.IsUnityEditor())
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(fullPath)); 
+                Directory.CreateDirectory(Path.GetDirectoryName(folderPath)); 
             }
 
             Sprite sprite = null;
 
-            byte[] byteArray = File.ReadAllBytes(fullPath);
+            byte[] byteArray = File.ReadAllBytes(folderPath + spritePath);
             Texture2D texture = new Texture2D(1, 1);
             texture.LoadImage(byteArray);
             
@@ -156,6 +156,11 @@ namespace ModdableInventory
                 new Vector2(.5f, .5f), 100);
 
             return sprite;
+        }
+
+        private Sprite LoadInternalSprite(string folderPath, string spritePath)
+        {
+            return Resources.Load<Sprite>(folderPath + spritePath);            
         }
     }
 }

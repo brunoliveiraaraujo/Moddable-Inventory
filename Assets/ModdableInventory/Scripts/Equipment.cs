@@ -93,9 +93,9 @@ namespace ModdableInventory
             }
         }
 
-        public void EquipItem(string itemName, int slotID = -1)
+        public void EquipItem(UniqueStringID stringID, int slotID = -1)
         {
-            ItemType item = GetItemFromInventory(itemName, inventory.InventoryItems);
+            ItemType item = GetItemFromInventoryByStringID(stringID, inventory.InventoryItems);
 
             if (item != null)
             {
@@ -114,9 +114,9 @@ namespace ModdableInventory
             }
         }
 
-        public void UnequipItem(string itemName, int slotID = -1)
+        public void UnequipItem(UniqueStringID stringID, int slotID = -1)
         {
-            ItemType item = GetItemFromEquipped(itemName);
+            ItemType item = GetItemFromEquippedByStringID(stringID);
 
             if (item != null)
             {
@@ -142,7 +142,7 @@ namespace ModdableInventory
                 if (slot.Item == null)
                 {
                     slot.Item = item;
-                    inventory.RemoveItemFromInventory(item.IDName);
+                    inventory.RemoveItemFromInventoryByID(item.UniqueID);
                     inventory.CurrentWeight += item.Weight;
                     return true;
                 }
@@ -154,24 +154,24 @@ namespace ModdableInventory
         {
             if (item.GetType().Name.Equals(slot.ItemTypeName) || item.GetType().BaseType.Name.Equals(slot.ItemTypeName))
             {
-                if (slot.Item != null && slot.Item.IDName.Equals(item.IDName))
+                if (slot.Item != null && slot.Item.UniqueID.Equals(item.UniqueID))
                 {
                     slot.Item = null;
                     inventory.CurrentWeight -= item.Weight;
-                    inventory.AddItemToInventory(item.IDName);
+                    inventory.AddItemToInventoryByID(item.UniqueID);
                     return true;
                 }
             }
             return false;
         }
 
-        private ItemType GetItemFromEquipped(string name)
+        private ItemType GetItemFromEquippedByStringID(UniqueStringID uniqueIDToSearch)
         {
             foreach (var slot in equippedItems)
             {
                 if (slot.Item != null)
                 {
-                    if (StringUtils.StringContainsName(slot.Item.IDName, name))
+                    if (StringUtils.StringContainsName(slot.Item.UniqueID.StringID, uniqueIDToSearch.StringID))
                     {
                         return slot.Item;
                     }
@@ -181,13 +181,13 @@ namespace ModdableInventory
             return null;
         }
 
-        private ItemType GetItemFromInventory(string name, ReadOnlyCollection<ItemCategory> inventoryItems)
+        private ItemType GetItemFromInventoryByStringID(UniqueStringID uniqueIDToSearch, ReadOnlyCollection<ItemCategory> inventoryItems)
         {
             foreach (var category in inventoryItems)
             {
                 foreach (var slot in category.ItemSlots)
                 {
-                    if (StringUtils.StringContainsName(slot.Item.IDName, name))
+                    if (StringUtils.StringContainsName(slot.Item.UniqueID.StringID, uniqueIDToSearch.StringID))
                     {
                         return slot.Item;
                     }

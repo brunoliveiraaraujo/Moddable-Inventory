@@ -15,9 +15,9 @@ namespace ModdableInventory
         private const string ITEMS_NAMESPACE = "";
         private const string ITEM_DATABASE_YAML_PATH = "gamedata/config/itemDatabase.yaml";
 
-        private List<ItemCategory> items = new List<ItemCategory>();
+        private List<ItemCategory> itemCategories = new List<ItemCategory>();
         
-        public ReadOnlyCollection<ItemCategory> Items => items.AsReadOnly();
+        public ReadOnlyCollection<ItemCategory> ItemCategories => itemCategories.AsReadOnly();
         
         public event EventHandler DatabaseInitialized;
         
@@ -69,7 +69,7 @@ namespace ModdableInventory
 
         private void ExtractAllItemsSprites()
         {
-            foreach (var category in items)
+            foreach (var category in itemCategories)
             {
                 foreach (var slot in category.ItemSlots)
                 {
@@ -86,7 +86,7 @@ namespace ModdableInventory
             {
                 if (entry.Key.ToString().Equals("categoryName"))
                 {
-                    items.Add(new ItemCategory(typeName, entry.Value.ToString(), new List<ItemSlot>()));
+                    itemCategories.Add(new ItemCategory(typeName, entry.Value.ToString(), new List<ItemSlot>()));
                 }
                 else if (entry.Key.ToString().Equals("items"))
                 {
@@ -100,7 +100,7 @@ namespace ModdableInventory
 
         private void ParseItem(KeyValuePair<YamlNode, YamlNode> itemNode, string typeName, int categoryID)
         {
-            string idName = itemNode.Key.ToString();
+            UniqueStringID uniqueID = new UniqueStringID(itemNode.Key.ToString());
 
             Dictionary<string, string> itemData = new Dictionary<string, string>();
 
@@ -116,9 +116,9 @@ namespace ModdableInventory
             Type itemType = Type.GetType(ITEMS_NAMESPACE + "." + typeName, true);
             ItemType instance = (ItemType) Activator.CreateInstance(itemType);
 
-            instance.Initialize(idName, itemData);
+            instance.Initialize(uniqueID, itemData);
             
-            items[categoryID].ItemSlots.Add(new ItemSlot(instance));
+            itemCategories[categoryID].ItemSlots.Add(new ItemSlot(instance));
         }
     }
 }

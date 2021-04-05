@@ -19,6 +19,7 @@ public class InventoryUIManager : MonoBehaviour
     [SerializeField] private Transform itemTooltip;
     [SerializeField] private TextMeshProUGUI weightText;
     [SerializeField] private TextMeshProUGUI goldText;
+    [SerializeField] private TabGroup inventoryTabs;
 
     private ItemDatabase database;
     private Inventory inventory;
@@ -43,6 +44,14 @@ public class InventoryUIManager : MonoBehaviour
 
         inventory.InventoryInitialized += OnInventoryInitialized;
         equipment.EquipmentInitialized += OnEquipmentInitialized;
+    }
+
+    private void Start() 
+    {
+        for (int i = 0; i < database.ItemCategories.Count; i++)
+        {
+            inventoryTabs.ChangeTabText(i+1, database.ItemCategories[i].CategoryName.ToLower());
+        }
     }
 
     private void OnInventoryInitialized(object sender, EventArgs e)
@@ -78,29 +87,29 @@ public class InventoryUIManager : MonoBehaviour
         }
     }
 
-    public void EquipItem(string itemIDName)
+    public void EquipItem(UniqueStringID stringID)
     {
-        equipment.EquipItem(itemIDName);
+        equipment.EquipItem(stringID);
         DisplayEquipment();
         DisplayItemPage(currentPageID);
     }
 
-    public void UnequipItem(string itemIDName, int equipSlotID)
+    public void UnequipItem(UniqueStringID stringID, int equipSlotID)
     {
-        equipment.UnequipItem(itemIDName, equipSlotID);
+        equipment.UnequipItem(stringID, equipSlotID);
         DisplayEquipment();
         DisplayItemPage(currentPageID);
     }
 
-    public void ShowItemTooltip(Vector3 pos, string itemIDName)
+    public void ShowItemTooltip(Vector3 pos, UniqueStringID stringID)
     {
-        if (itemIDName != null)
+        if (stringID != null)
         {
-            foreach (var category in database.Items)
+            foreach (var category in database.ItemCategories)
             {
                 foreach (var slot in category.ItemSlots)
                 {
-                    if (slot.Item.IDName.Equals(itemIDName))
+                    if (slot.Item.UniqueID.Equals(stringID))
                     {
                         SetTooltipData(pos, slot.Item);
                     }
@@ -143,17 +152,17 @@ public class InventoryUIManager : MonoBehaviour
         for (int i = 0; i < inventory.InventoryItems[categoryID].ItemSlots.Count; i++)
         {
             ItemSlot itemSlot = inventory.InventoryItems[categoryID].ItemSlots[i];
-            Transform itemImage = inventoryGridUI.GetChild(i + imageSlotOffset).GetChild(0);
-            Transform itemCount = inventoryGridUI.GetChild(i + imageSlotOffset).GetChild(1);
+            Transform itemImageObj = inventoryGridUI.GetChild(i + imageSlotOffset).GetChild(0);
+            Transform itemCountObj = inventoryGridUI.GetChild(i + imageSlotOffset).GetChild(1);
 
-            itemImage.gameObject.SetActive(true);
-            itemImage.GetComponent<Image>().sprite = itemSlot.Item.Sprite;
+            itemImageObj.gameObject.SetActive(true);
+            itemImageObj.GetComponent<Image>().sprite = itemSlot.Item.Sprite;
 
-            itemCount.gameObject.SetActive(true);
-            itemCount.GetComponent<TextMeshProUGUI>().text = itemSlot.Amount.ToString();
+            itemCountObj.gameObject.SetActive(true);
+            itemCountObj.GetComponent<TextMeshProUGUI>().text = itemSlot.Amount.ToString();
 
             SetInventoryGridSlotButtonData(
-                itemImage.GetComponent<InventoryGridSlotButton>(), 
+                itemImageObj.GetComponent<InventoryGridSlotButton>(), 
                 itemSlot    
             );
         }
@@ -194,7 +203,7 @@ public class InventoryUIManager : MonoBehaviour
                 else
                 {
                     bool itemCategoryFound = false;
-                    foreach (ItemCategory itemCategory in database.Items)
+                    foreach (ItemCategory itemCategory in database.ItemCategories)
                     {
                         if (equipImageSlot.name.Equals(itemCategory.ItemTypeName))
                         {
@@ -221,14 +230,14 @@ public class InventoryUIManager : MonoBehaviour
 
     private void SetInventoryGridSlotButtonData(InventoryGridSlotButton button, ItemSlot itemSlot)
     {
-        button.SetData(itemSlot.Item.IDName);
+        button.SetData(itemSlot.Item.UniqueID);
     }
 
     private void SetEquipSlotButtonData(EquipmentSlotButton button, EquipmentSlot equipSlot, int equipSlotID = -1, bool unequipItem = false)
     {
         if (!unequipItem)
         {
-            button.SetData(equipSlot.Item.IDName, equipSlotID);
+            button.SetData(equipSlot.Item.UniqueID, equipSlotID);
         }
         else
         {
@@ -258,11 +267,11 @@ public class InventoryUIManager : MonoBehaviour
     {
         inventory.Money += 999999;
 
-        foreach (ItemCategory category in database.Items)
+        foreach (ItemCategory category in database.ItemCategories)
         {
             foreach (ItemSlot slot in category.ItemSlots)
             {
-                inventory.AddItemToInventory(slot.Item.Name, slot.Item.StackLimit * 2);
+                inventory.AddItemToInventoryByName(slot.Item.Name, slot.Item.StackLimit * 2);
             }
         }
     }

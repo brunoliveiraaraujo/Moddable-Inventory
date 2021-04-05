@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class TabGroup : MonoBehaviour
 {
@@ -13,6 +14,7 @@ public class TabGroup : MonoBehaviour
 
     private TabButton selectedTab;
     private List<TabButton> tabButtons = new List<TabButton>();
+    private List<TextMeshProUGUI> tabTexts = new List<TextMeshProUGUI>();
 
     private void Awake() 
     {
@@ -20,11 +22,8 @@ public class TabGroup : MonoBehaviour
 
         for (int i = 0; i < transform.childCount; i++)
         {
-            TabButton tab = transform.GetChild(i).GetComponent<TabButton>();
-            if (tab != null)
-            {
-                tabButtons.Add(tab);
-            }
+            tabButtons.Add(transform.GetChild(i).GetComponent<TabButton>());
+            tabTexts.Add(transform.GetChild(i).GetChild(0).GetComponent<TextMeshProUGUI>());
         }
     }
 
@@ -65,6 +64,11 @@ public class TabGroup : MonoBehaviour
 
         ResetTabs();
         tab.Background.color = colorActive;
+    }
+
+    public void ChangeTabText(int tabID, string text)
+    {
+        tabTexts[tabID].text = text;
     }
 
     private void ResetTabs()

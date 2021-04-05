@@ -7,7 +7,7 @@ using ModdableInventory.Utils;
 
 namespace ModdableInventory
 {
-    public abstract class Item
+    public abstract class ItemType
     {
         private const string SPRITES_FOLDER_PATH = "gamedata/sprites/items/";
 
@@ -43,17 +43,7 @@ namespace ModdableInventory
                 throw new ArgumentOutOfRangeException($"stackLimit of \"{Name}\"", "cannot be negative");
         }
 
-        public virtual void LoadProperties()
-        {
-            Name = SetProperty("name", "generic_item");
-            Cost = SetProperty<int>("cost", 0);
-            Weight = SetProperty<float>("weight", 0);
-            StackLimit = SetProperty<int>("stackLimit", 99);
-            MultiStack = SetProperty<bool>("multiStack", true);
-            SpritePath = SetProperty("spritePath", IDName + ".png");
-        }
-
-        public virtual string ItemDataToString(int decimalPlaces = 2)
+        public virtual string PropertiesToString(int decimalPlaces = 2)
         {
             string text = "";
 
@@ -61,24 +51,6 @@ namespace ModdableInventory
             text += $"weight: {StringUtils.FloatToString(Weight, decimalPlaces)}\n";
 
             return text;
-        }
-
-        public virtual void LogItem(int decimalPlaces = 2)
-        {
-            // TODO: UI: use a class responsible for UI stuff instead
-            GameObject display = new GameObject(IDName);
-            SpriteRenderer spriteRenderer = display.AddComponent<SpriteRenderer>();
-            spriteRenderer.sprite = Sprite;
-            display.transform.position = new Vector3(Weight/10, 1, -9);
-            // ENDTODO
-
-            // TODO: UI: use Applicatoin.logMessageReceived to get access to all exceptions and eventually show them in-game
-        
-            Debug.Log($"{Name}");
-            Debug.Log($"    cost={Cost}");
-            Debug.Log($"    stackLimit={StackLimit}");
-            Debug.Log($"    multiStack={MultiStack}");
-            Debug.Log($"    weight={StringUtils.FloatToString(Weight, decimalPlaces)}");
         }
 
         // Textures must be read/write enabled in the inspector to be able to extract
@@ -91,6 +63,16 @@ namespace ModdableInventory
                 Directory.CreateDirectory(Path.GetDirectoryName(fullPath));
                 IOUtils.WriteFileToDirectory(fullPath, Sprite.texture.EncodeToPNG());
             }
+        }
+
+        protected virtual void LoadProperties()
+        {
+            Name = SetProperty("name", "generic_item");
+            Cost = SetProperty<int>("cost", 0);
+            Weight = SetProperty<float>("weight", 0);
+            StackLimit = SetProperty<int>("stackLimit", 99);
+            MultiStack = SetProperty<bool>("multiStack", true);
+            SpritePath = SetProperty("spritePath", IDName + ".png");
         }
 
         protected string SetProperty(string key, string defaultValue)

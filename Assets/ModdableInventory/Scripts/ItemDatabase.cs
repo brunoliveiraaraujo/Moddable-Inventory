@@ -19,12 +19,18 @@ namespace ModdableInventory
         
         public ReadOnlyCollection<ItemCategory> Items => items.AsReadOnly();
         
-        // TODO: Events: all methods that subscribe to an event should be called OnEventName
         public event EventHandler DatabaseInitialized;
         
         private void Start() 
         {
             InitializeDatabase();
+        }
+
+        private void OnDatabaseInitialized(object sender, EventArgs e)
+        {
+            DatabaseInitialized -= OnDatabaseInitialized;
+
+            ExtractAllItemsSprites();
         }
 
         private void InitializeDatabase()
@@ -50,7 +56,7 @@ namespace ModdableInventory
                 {
                     if (bool.Parse(topLevelNode.Value.ToString()))
                     {
-                        DatabaseInitialized += ExtractAllItemsSprites;
+                        DatabaseInitialized += OnDatabaseInitialized;
                     }
                 }
                 else
@@ -61,10 +67,8 @@ namespace ModdableInventory
             }
         }
 
-        private void ExtractAllItemsSprites(object sender, EventArgs e)
+        private void ExtractAllItemsSprites()
         {
-            DatabaseInitialized -= ExtractAllItemsSprites;
-
             foreach (var category in items)
             {
                 foreach (var slot in category.ItemSlots)
@@ -110,7 +114,7 @@ namespace ModdableInventory
             catch (InvalidCastException) {} // loading parameters is optional, they have defaults
 
             Type itemType = Type.GetType(ITEMS_NAMESPACE + "." + typeName, true);
-            Item instance = (Item) Activator.CreateInstance(itemType);
+            ItemType instance = (ItemType) Activator.CreateInstance(itemType);
 
             instance.Initialize(idName, itemData);
             

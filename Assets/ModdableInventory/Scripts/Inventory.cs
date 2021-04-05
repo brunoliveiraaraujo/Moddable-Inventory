@@ -39,20 +39,23 @@ namespace ModdableInventory
         public ReadOnlyCollection<ItemCategory> InventoryItems => inventoryItems.AsReadOnly();
 
         public event EventHandler InventoryInitialized;
-        // TODO: cleanup: use or remove "InventoryFull"
-        // public event EventHandler InventoryFull;
 
         private void Awake() 
         {
             database = GetComponent<ItemDatabase>();
 
-            database.DatabaseInitialized += InitializeInventory;
+            database.DatabaseInitialized += OnDatabaseInitialized;
         }
 
-        private void InitializeInventory(object sender, EventArgs e)
+        private void OnDatabaseInitialized(object sender, EventArgs e)
         {
-            database.DatabaseInitialized -= InitializeInventory;
+            database.DatabaseInitialized -= OnDatabaseInitialized;
+            
+            InitializeInventory();
+        }
 
+        private void InitializeInventory()
+        {
             string internalInventoryYAML = Resources.Load<TextAsset>(Path.ChangeExtension(INVENTORY_YAML_PATH, null)).text;
 
             ParseInventory(IOUtils.ReadOrMakeYAMLFile(internalInventoryYAML, INVENTORY_YAML_PATH));
@@ -101,13 +104,11 @@ namespace ModdableInventory
 
         public void AddItemToInventory(int categoryID, int itemID, int addAmount = 1)
         {
-            Item item = GetItemFromDatabase(categoryID, itemID);
+            ItemType item = GetItemFromDatabase(categoryID, itemID);
             ItemSlot currSlot = GetLastSlotWithItem(categoryID, itemID);
 
             if (limitedByWeight && ReachedWeightLimit(item.Weight, ref addAmount))
             {
-                // InventoryFull?.Invoke(this, EventArgs.Empty);
-
                 if (addAmount == 0) return;
             }
 
@@ -143,7 +144,7 @@ namespace ModdableInventory
 
         public void RemoveItemFromInventory(int categoryID, int itemID, int subAmount = 1)
         {
-            Item item = GetItemFromDatabase(categoryID, itemID);
+            ItemType item = GetItemFromDatabase(categoryID, itemID);
             ItemSlot currSlot = GetLastSlotWithItem(categoryID, itemID);
 
             int amountLeftToSub = subAmount;
@@ -191,7 +192,7 @@ namespace ModdableInventory
 
         private void AddNewItemSlot(ref ItemSlot currSlot, int categoryID, int itemID, int itemAmount)
         {
-            Item item = GetItemFromDatabase(categoryID, itemID);
+            ItemType item = GetItemFromDatabase(categoryID, itemID);
 
             inventoryItems[categoryID].ItemSlots.Add(currSlot = new ItemSlot(item, Mathf.Min(itemAmount, item.StackLimit)));
             currentWeight += currSlot.Weight;
@@ -213,7 +214,7 @@ namespace ModdableInventory
         // this makes it so that items are added/removed from the last slot first.
         private ItemSlot GetLastSlotWithItem(int categoryID, int itemID)
         {
-            Item item = GetItemFromDatabase(categoryID, itemID);
+            ItemType item = GetItemFromDatabase(categoryID, itemID);
 
             for (int i = inventoryItems[categoryID].ItemSlots.Count - 1; i >= 0; i--)
             {
@@ -228,7 +229,7 @@ namespace ModdableInventory
             return null;
         }
 
-        private Item GetItemFromDatabase(int categoryID, int itemID)
+        private ItemType GetItemFromDatabase(int categoryID, int itemID)
         {
             return database.Items[categoryID].ItemSlots[itemID].Item;
         }

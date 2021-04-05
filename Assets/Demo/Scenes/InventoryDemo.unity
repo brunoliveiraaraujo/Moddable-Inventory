@@ -9585,9 +9585,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1237307642}
-  - component: {fileID: 1237307643}
-  - component: {fileID: 1237307646}
-  - component: {fileID: 1237307648}
+  - component: {fileID: 1237307647}
+  - component: {fileID: 1237307645}
+  - component: {fileID: 1237307644}
   - component: {fileID: 1237307649}
   m_Layer: 0
   m_Name: Inventory
@@ -9608,9 +9608,9 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1237307643
+--- !u!114 &1237307644
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -9619,10 +9619,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1237307641}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 67c432925390bbf408dc390ee22d423c, type: 3}
+  m_Script: {fileID: 11500000, guid: b703bdf46491c184e81246558a6db640, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &1237307646
+--- !u!114 &1237307645
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -9631,10 +9631,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1237307641}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7b73938109fc65d45a1c0004a24bc371, type: 3}
+  m_Script: {fileID: 11500000, guid: e9b7df7464e867c42895a4a087a9d671, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &1237307648
+--- !u!114 &1237307647
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -9643,7 +9643,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1237307641}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7597649b72f4dcb418e36643e1d69185, type: 3}
+  m_Script: {fileID: 11500000, guid: bb060745e1d120646a4bd7c6d59ada29, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &1237307649
@@ -11998,7 +11998,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1485161822
 PrefabInstance:
@@ -14927,6 +14927,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   distanceToMouse: 10
+  targetPos: {x: 0, y: 0, z: 0}
 --- !u!1001 &1792441714
 PrefabInstance:
   m_ObjectHideFlags: 0

@@ -1,6 +1,6 @@
 ##### itemDatabase.yaml #####
 # This file contains the data of all items in the game.
-# Each item is defined in their corresponding item category (named after an Item Subclass).
+# Each item is defined in their corresponding item category (named after an ItemType).
 
 ## General Settings ##
 # extractSpriteData: {bool} 
@@ -10,11 +10,11 @@ extractSpriteData: false
 
 ## Item Categories ##
 # Entries in item categories use the following format:
-# <ItemClass>:
+# <ItemType>:
 #   categoryName:<string> # the in-game name of this item category>
 #   items:
-#     <itemEntry>:       # unique identifier for this item  
-#       <key>:<value>     # parameters used on this class of item
+#     <itemEntry>:        # unique identifier for this item  
+#       <key>:<value>     # parameters used for a item of this type
 #       ...
 #     ...
 

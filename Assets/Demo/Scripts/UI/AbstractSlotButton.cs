@@ -17,7 +17,7 @@ public abstract class AbstractSlotButton : MonoBehaviour, IPointerClickHandler, 
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        uiManager.ShowItemTooltip(itemIDName);
+        uiManager.ShowItemTooltip(transform.position, itemIDName);
     }
 
     public void OnPointerExit(PointerEventData eventData)

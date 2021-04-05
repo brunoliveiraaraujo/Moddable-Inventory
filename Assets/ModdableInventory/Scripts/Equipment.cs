@@ -29,13 +29,18 @@ namespace ModdableInventory
             database = GetComponent<ItemDatabase>();
             inventory = GetComponent<Inventory>();
 
-            database.DatabaseInitialized += InitializeEquipment;
+            database.DatabaseInitialized += OnDatabaseInitialized;
         }
 
-        private void InitializeEquipment(object sender, EventArgs e)
+        private void OnDatabaseInitialized(object sender, EventArgs e)
         {
-            database.DatabaseInitialized -= InitializeEquipment;
+            database.DatabaseInitialized -= OnDatabaseInitialized;
 
+            InitializeEquipment();
+        }
+
+        private void InitializeEquipment()
+        {
             string internalEquipmentYAML = Resources.Load<TextAsset>(Path.ChangeExtension(EQUIPMENT_YAML_PATH, null)).text;
 
             ParseEquipment(IOUtils.ReadOrMakeYAMLFile(internalEquipmentYAML, EQUIPMENT_YAML_PATH));
@@ -90,7 +95,7 @@ namespace ModdableInventory
 
         public void EquipItem(string itemName, int slotID = -1)
         {
-            Item item = GetItemFromInventory(itemName, inventory.InventoryItems);
+            ItemType item = GetItemFromInventory(itemName, inventory.InventoryItems);
 
             if (item != null)
             {
@@ -109,24 +114,9 @@ namespace ModdableInventory
             }
         }
 
-        private bool EquipItemInSlot(Item item, EquipmentSlot slot)
-        {
-            if (item.GetType().Name.Equals(slot.ItemTypeName) || item.GetType().BaseType.Name.Equals(slot.ItemTypeName))
-            {
-                if (slot.Item == null)
-                {
-                    slot.Item = item;
-                    inventory.RemoveItemFromInventory(item.IDName);
-                    inventory.CurrentWeight += item.Weight;
-                    return true;
-                }
-            }
-            return false;
-        }
-
         public void UnequipItem(string itemName, int slotID = -1)
         {
-            Item item = GetItemFromEquipped(itemName);
+            ItemType item = GetItemFromEquipped(itemName);
 
             if (item != null)
             {
@@ -145,7 +135,22 @@ namespace ModdableInventory
             }
         }
 
-        private bool UnequipItemInSlot(Item item, EquipmentSlot slot)
+        private bool EquipItemInSlot(ItemType item, EquipmentSlot slot)
+        {
+            if (item.GetType().Name.Equals(slot.ItemTypeName) || item.GetType().BaseType.Name.Equals(slot.ItemTypeName))
+            {
+                if (slot.Item == null)
+                {
+                    slot.Item = item;
+                    inventory.RemoveItemFromInventory(item.IDName);
+                    inventory.CurrentWeight += item.Weight;
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private bool UnequipItemInSlot(ItemType item, EquipmentSlot slot)
         {
             if (item.GetType().Name.Equals(slot.ItemTypeName) || item.GetType().BaseType.Name.Equals(slot.ItemTypeName))
             {
@@ -160,7 +165,7 @@ namespace ModdableInventory
             return false;
         }
 
-        private Item GetItemFromEquipped(string name)
+        private ItemType GetItemFromEquipped(string name)
         {
             foreach (var slot in equippedItems)
             {
@@ -176,7 +181,7 @@ namespace ModdableInventory
             return null;
         }
 
-        private Item GetItemFromInventory(string name, ReadOnlyCollection<ItemCategory> inventoryItems)
+        private ItemType GetItemFromInventory(string name, ReadOnlyCollection<ItemCategory> inventoryItems)
         {
             foreach (var category in inventoryItems)
             {

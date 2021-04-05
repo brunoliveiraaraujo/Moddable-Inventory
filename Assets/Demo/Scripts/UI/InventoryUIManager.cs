@@ -23,6 +23,9 @@ public class InventoryUIManager : MonoBehaviour
     private ItemDatabase database;
     private Inventory inventory;
     private Equipment equipment;
+    UIFollowMouse tooltipScript;
+    TextMeshProUGUI tooltipHeader;
+    TextMeshProUGUI tooltipBody;
 
     private int currentPageID = 0;
 
@@ -34,6 +37,9 @@ public class InventoryUIManager : MonoBehaviour
         database = GetComponent<ItemDatabase>();
         inventory = GetComponent<Inventory>();    
         equipment = GetComponent<Equipment>();
+        tooltipScript = itemTooltip.GetComponent<UIFollowMouse>();
+        tooltipHeader = itemTooltip.GetChild(0).GetComponent<TextMeshProUGUI>();
+        tooltipBody = itemTooltip.GetChild(1).GetComponent<TextMeshProUGUI>();
 
         inventory.InventoryInitialized += OnInventoryInitialized;
         equipment.EquipmentInitialized += OnEquipmentInitialized;
@@ -86,25 +92,22 @@ public class InventoryUIManager : MonoBehaviour
         DisplayItemPage(currentPageID);
     }
 
-    public void ShowItemTooltip(string itemIDName)
+    public void ShowItemTooltip(Vector3 pos, string itemIDName)
     {
         if (itemIDName != null)
         {
-            itemTooltip.gameObject.SetActive(true);
-
-            TextMeshProUGUI header = itemTooltip.GetChild(0).GetComponent<TextMeshProUGUI>();
-            TextMeshProUGUI body = itemTooltip.GetChild(1).GetComponent<TextMeshProUGUI>();
-
             foreach (var category in database.Items)
             {
                 foreach (var slot in category.ItemSlots)
                 {
                     if (slot.Item.IDName.Equals(itemIDName))
                     {
-                        SetTooltipData(header, body, slot.Item);
+                        SetTooltipData(pos, slot.Item);
                     }
                 }
             }
+
+            itemTooltip.gameObject.SetActive(true);
         }  
     }
 
@@ -113,10 +116,11 @@ public class InventoryUIManager : MonoBehaviour
         itemTooltip.gameObject.SetActive(false);
     }
 
-    private void SetTooltipData(TextMeshProUGUI header, TextMeshProUGUI body, Item item)
+    private void SetTooltipData(Vector3 pos, ItemType item)
     {
-        header.text = item.Name;
-        body.text = item.ItemDataToString();
+        tooltipScript.targetPos = pos;
+        tooltipHeader.text = item.Name;
+        tooltipBody.text = item.PropertiesToString();
     }
 
     private void DisplayAllItems()
@@ -258,7 +262,7 @@ public class InventoryUIManager : MonoBehaviour
         {
             foreach (ItemSlot slot in category.ItemSlots)
             {
-                inventory.AddItemToInventory(slot.Item.Name, slot.Item.StackLimit);
+                inventory.AddItemToInventory(slot.Item.Name, slot.Item.StackLimit * 2);
             }
         }
     }

@@ -16,7 +16,7 @@ namespace ModdableInventory
 
         public string SlotName => slotName;
         public string ItemTypeName => itemTypeName;
-        public Item Item { get; set; } = null;
+        public ItemType Item { get; set; } = null;
         
     }
 }

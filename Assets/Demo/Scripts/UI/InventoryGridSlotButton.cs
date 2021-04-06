@@ -7,6 +7,6 @@ public class InventoryGridSlotButton : AbstractSlotButton
 {
     public override void OnPointerClick(PointerEventData eventData)
     {
-        uiManager.EquipItem(stringID);
+        uiManager.EquipItem(itemStringID);
     }
 }

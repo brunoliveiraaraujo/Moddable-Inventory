@@ -89,34 +89,27 @@ namespace ModdableInventory
                     }
                 }
 
-                equippedItems.Add(new EquipmentSlot(slotName, typeName));
+                equippedItems.Add(new EquipmentSlot(slotName, Type.GetType(GlobalConstants.ITEMS_NAMESPACE + "." + typeName, true)));
             }
         }
 
-        public void EquipItem(UniqueStringID stringID, int slotID = -1)
+        public void EquipItem(string itemStringID)
         {
-            ItemType item = GetItemFromInventoryByStringID(stringID, inventory.InventoryItems);
+            Item item = GetItemFromInventoryByStringID(itemStringID, inventory.InventoryItems);
 
             if (item != null)
             {
-                if (slotID < 0)
+                foreach (var slot in equippedItems)
                 {
-                    foreach (var slot in equippedItems)
-                    {
-                        bool equipped = EquipItemInSlot(item, slot);
-                        if (equipped) return;
-                    }
-                }
-                else
-                {
-                    EquipItemInSlot(item, equippedItems[slotID]);
+                    bool equipped = EquipItemInSlot(item, slot);
+                    if (equipped) return;
                 }
             }
         }
 
-        public void UnequipItem(UniqueStringID stringID, int slotID = -1)
+        public void UnequipItem(string itemStringID, int slotID = -1)
         {
-            ItemType item = GetItemFromEquippedByStringID(stringID);
+            Item item = GetItemFromEquippedByStringID(itemStringID);
 
             if (item != null)
             {
@@ -130,48 +123,56 @@ namespace ModdableInventory
                 }
                 else
                 {
-                    UnequipItemInSlot(item, equippedItems[slotID]);
+                    UnequipItemInSlot(item, equippedItems[slotID], true);
                 }
             }
         }
 
-        private bool EquipItemInSlot(ItemType item, EquipmentSlot slot)
+        private bool EquipItemInSlot(Item item, EquipmentSlot slot, bool throwOnError = false)
         {
-            if (item.GetType().Name.Equals(slot.ItemTypeName) || item.GetType().BaseType.Name.Equals(slot.ItemTypeName))
+            try
             {
                 if (slot.Item == null)
                 {
                     slot.Item = item;
-                    inventory.RemoveItemFromInventoryByID(item.UniqueID);
+                    inventory.RemoveItemFromInventoryByID(item.ItemStringID);
                     inventory.CurrentWeight += item.Weight;
                     return true;
                 }
             }
-            return false;
-        }
-
-        private bool UnequipItemInSlot(ItemType item, EquipmentSlot slot)
-        {
-            if (item.GetType().Name.Equals(slot.ItemTypeName) || item.GetType().BaseType.Name.Equals(slot.ItemTypeName))
+            catch (InvalidCastException e) 
             {
-                if (slot.Item != null && slot.Item.UniqueID.Equals(item.UniqueID))
-                {
-                    slot.Item = null;
-                    inventory.CurrentWeight -= item.Weight;
-                    inventory.AddItemToInventoryByID(item.UniqueID);
-                    return true;
-                }
+                if (throwOnError) throw e;
             }
             return false;
         }
 
-        private ItemType GetItemFromEquippedByStringID(UniqueStringID uniqueIDToSearch)
+        private bool UnequipItemInSlot(Item item, EquipmentSlot slot, bool throwOnError = false)
+        {
+            try
+            {
+                if (slot.Item != null && slot.Item.ItemStringID.Equals(item.ItemStringID))
+                {
+                    slot.Item = null;
+                    inventory.CurrentWeight -= item.Weight;
+                    inventory.AddItemToInventoryByID(item.ItemStringID);
+                    return true;
+                }
+            }
+            catch (InvalidCastException e) 
+            {
+                if (throwOnError) throw e;
+            }
+            return false;
+        }
+
+        private Item GetItemFromEquippedByStringID(string itemStringID)
         {
             foreach (var slot in equippedItems)
             {
                 if (slot.Item != null)
                 {
-                    if (StringUtils.StringContainsName(slot.Item.UniqueID.StringID, uniqueIDToSearch.StringID))
+                    if (StringUtils.StringContainsName(slot.Item.ItemStringID, itemStringID))
                     {
                         return slot.Item;
                     }
@@ -181,13 +182,13 @@ namespace ModdableInventory
             return null;
         }
 
-        private ItemType GetItemFromInventoryByStringID(UniqueStringID uniqueIDToSearch, ReadOnlyCollection<ItemCategory> inventoryItems)
+        private Item GetItemFromInventoryByStringID(string itemStringID, ReadOnlyCollection<ItemCategory> inventoryItems)
         {
             foreach (var category in inventoryItems)
             {
                 foreach (var slot in category.ItemSlots)
                 {
-                    if (StringUtils.StringContainsName(slot.Item.UniqueID.StringID, uniqueIDToSearch.StringID))
+                    if (StringUtils.StringContainsName(slot.Item.ItemStringID, itemStringID))
                     {
                         return slot.Item;
                     }

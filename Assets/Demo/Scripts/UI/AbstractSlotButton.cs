@@ -7,18 +7,18 @@ using ModdableInventory;
 public abstract class AbstractSlotButton : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
     [SerializeField] protected InventoryUIManager uiManager;
-    protected UniqueStringID stringID = null;
+    protected string itemStringID = null;
 
-    public void SetData(UniqueStringID stringID)
+    public void SetData(string itemStringID)
     {
-        this.stringID = stringID;
+        this.itemStringID = itemStringID;
     }
 
     public abstract void OnPointerClick(PointerEventData eventData);
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        uiManager.ShowItemTooltip(transform.position, stringID);
+        uiManager.ShowItemTooltip(transform.position, itemStringID);
     }
 
     public void OnPointerExit(PointerEventData eventData)

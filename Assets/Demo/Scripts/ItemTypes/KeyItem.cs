@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using ModdableInventory;
 
-public class KeyItem : ItemType
+public class KeyItem : Item
 {
     protected override void LoadProperties()
     {

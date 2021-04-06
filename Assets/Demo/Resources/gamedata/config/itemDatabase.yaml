@@ -13,7 +13,7 @@ extractSpriteData: false
 # <ItemType>:
 #   categoryName:<string> # the in-game name of this item category>
 #   items:
-#     <stringID>:         # unique identifier for this item  
+#     <itemStringID>:     # unique identifier for this item  
 #       <key>:<value>     # parameters used for a item of this type
 #       ...
 #     ...
@@ -25,7 +25,7 @@ extractSpriteData: false
 # weight: {float, default=0}             # the item's weight
 # stackLimit: {int, default=99}          # maximum number of this item in a stack (> 0)         
 # multiStack: {bool, default=true}       # allow additional stacks in inventory?
-# spritePath: {string, default="<itemEntry>.png"} 
+# spritePath: {string, default="<itemStringID>.png"} 
   # path to the item's sprite, relative to "<game_folder>/gamedata/sprites/items/"
   # supported sprite formats are: .bmp, .exr, .gif, .hdr, .iff, .jpg, .pict, .png, .psd, .tga and .tiff
 

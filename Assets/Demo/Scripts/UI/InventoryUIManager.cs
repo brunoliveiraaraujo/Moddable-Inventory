@@ -12,7 +12,7 @@ using System.Globalization;
 [RequireComponent(typeof(Equipment))]
 public class InventoryUIManager : MonoBehaviour
 {
-    private const string infinitySymbol = "\u221e";
+    private const string INFINITY_SYMBOL = "\u221e";
 
     [SerializeField] private Transform inventoryGridUI;
     [SerializeField] private Transform equipmentSlotsUI;
@@ -87,29 +87,29 @@ public class InventoryUIManager : MonoBehaviour
         }
     }
 
-    public void EquipItem(UniqueStringID stringID)
+    public void EquipItem(string itemStringID)
     {
-        equipment.EquipItem(stringID);
+        equipment.EquipItem(itemStringID);
         DisplayEquipment();
         DisplayItemPage(currentPageID);
     }
 
-    public void UnequipItem(UniqueStringID stringID, int equipSlotID)
+    public void UnequipItem(string itemStringID, int equipSlotID)
     {
-        equipment.UnequipItem(stringID, equipSlotID);
+        equipment.UnequipItem(itemStringID, equipSlotID);
         DisplayEquipment();
         DisplayItemPage(currentPageID);
     }
 
-    public void ShowItemTooltip(Vector3 pos, UniqueStringID stringID)
+    public void ShowItemTooltip(Vector3 pos, string itemStringID)
     {
-        if (stringID != null)
+        if (itemStringID != null)
         {
             foreach (var category in database.ItemCategories)
             {
                 foreach (var slot in category.ItemSlots)
                 {
-                    if (slot.Item.UniqueID.Equals(stringID))
+                    if (slot.Item.ItemStringID.Equals(itemStringID))
                     {
                         SetTooltipData(pos, slot.Item);
                     }
@@ -125,7 +125,7 @@ public class InventoryUIManager : MonoBehaviour
         itemTooltip.gameObject.SetActive(false);
     }
 
-    private void SetTooltipData(Vector3 pos, ItemType item)
+    private void SetTooltipData(Vector3 pos, Item item)
     {
         tooltipScript.targetPos = pos;
         tooltipHeader.text = item.Name;
@@ -186,7 +186,7 @@ public class InventoryUIManager : MonoBehaviour
             EquipmentSlot equipSlot = equipment.EquippedItems[i];
             Transform equipImageSlot = equipmentSlotsUI.GetChild(i).GetChild(0);
 
-            if (equipImageSlot.name.Equals(equipSlot.ItemTypeName))
+            if (equipImageSlot.name.Equals(equipSlot.ItemType.Name))
             {
                 Image equipSlotImage = equipImageSlot.GetComponent<Image>();
                 
@@ -205,7 +205,7 @@ public class InventoryUIManager : MonoBehaviour
                     bool itemCategoryFound = false;
                     foreach (ItemCategory itemCategory in database.ItemCategories)
                     {
-                        if (equipImageSlot.name.Equals(itemCategory.ItemTypeName))
+                        if (equipImageSlot.name.Equals(itemCategory.ItemType.Name))
                         {
                             equipSlotImage.sprite = itemCategory.ItemSlots[0].Item.Sprite;
                             equipSlotImage.color = new Color(0, 0, 0, 0.5f);
@@ -230,14 +230,14 @@ public class InventoryUIManager : MonoBehaviour
 
     private void SetInventoryGridSlotButtonData(InventoryGridSlotButton button, ItemSlot itemSlot)
     {
-        button.SetData(itemSlot.Item.UniqueID);
+        button.SetData(itemSlot.Item.ItemStringID);
     }
 
     private void SetEquipSlotButtonData(EquipmentSlotButton button, EquipmentSlot equipSlot, int equipSlotID = -1, bool unequipItem = false)
     {
         if (!unequipItem)
         {
-            button.SetData(equipSlot.Item.UniqueID, equipSlotID);
+            button.SetData(equipSlot.Item.ItemStringID, equipSlotID);
         }
         else
         {
@@ -256,7 +256,7 @@ public class InventoryUIManager : MonoBehaviour
         }
         else
         {
-            weightCapacity = infinitySymbol;
+            weightCapacity = INFINITY_SYMBOL;
         }
 
         weightText.text = $"weight: {currentWeight} / {weightCapacity} kg";

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using ModdableInventory;
 
-public class Armor : ItemType
+public class Armor : Item
 {
     public int Defense { get; private set; }
 

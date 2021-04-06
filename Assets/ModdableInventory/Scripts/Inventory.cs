@@ -62,7 +62,7 @@ namespace ModdableInventory
 
             for (int i = 0; i < database.ItemCategories.Count; i++)
             {
-                inventoryItems.Add(new ItemCategory(database.ItemCategories[i].ItemTypeName, database.ItemCategories[i].CategoryName, new List<ItemSlot>()));
+                inventoryItems.Add(new ItemCategory(database.ItemCategories[i].CategoryName, database.ItemCategories[i].ItemType));
             }
 
             InventoryInitialized?.Invoke(this, EventArgs.Empty);
@@ -91,8 +91,9 @@ namespace ModdableInventory
             }
         }
 
-        // adds first Item found in database which <item.Name> that contains <name>
-        // (case and spacing are ignored)
+        /// <remarks>
+        /// (case and spacing are ignored)
+        /// </remarks>
         public void AddItemToInventoryByName(string itemName, int addAmount = 1)
         {
             bool itemFound;
@@ -103,19 +104,19 @@ namespace ModdableInventory
             else throw new KeyNotFoundException($"Item {itemName} not found!");
         }
 
-        public void AddItemToInventoryByID(UniqueStringID stringID, int addAmount = 1)
+        public void AddItemToInventoryByID(string itemStringID, int addAmount = 1)
         {
             bool itemFound;
             int categoryID, itemID;
-            (itemFound, categoryID, itemID) = SearchItemInDatabaseByID(stringID);
+            (itemFound, categoryID, itemID) = SearchItemInDatabaseByID(itemStringID);
 
             if (itemFound) AddItemToInventoryByID(categoryID, itemID, addAmount);
-            else throw new KeyNotFoundException($"Item {stringID} not found!");    
+            else throw new KeyNotFoundException($"Item {itemStringID} not found!");    
         }
 
         public void AddItemToInventoryByID(int categoryID, int itemID, int addAmount = 1)
         {
-            ItemType item = GetItemFromDatabase(categoryID, itemID);
+            Item item = GetItemFromDatabase(categoryID, itemID);
             ItemSlot currSlot = GetLastSlotWithItem(categoryID, itemID);
 
             if (limitedByWeight && ReachedWeightLimit(item.Weight, ref addAmount))
@@ -154,19 +155,19 @@ namespace ModdableInventory
             else throw new KeyNotFoundException($"Item {ItemName} not found!");
         }
 
-        public void RemoveItemFromInventoryByID(UniqueStringID stringID, int subAmount = 1)
+        public void RemoveItemFromInventoryByID(string itemStringID, int subAmount = 1)
         {
             bool itemFound;
             int categoryID, itemID;
-            (itemFound, categoryID, itemID) = SearchItemInDatabaseByID(stringID);
+            (itemFound, categoryID, itemID) = SearchItemInDatabaseByID(itemStringID);
 
             if (itemFound) RemoveItemFromInventoryByID(categoryID, itemID, subAmount);
-            else throw new KeyNotFoundException($"Item {stringID} not found!");
+            else throw new KeyNotFoundException($"Item {itemStringID} not found!");
         }
 
         public void RemoveItemFromInventoryByID(int categoryID, int itemID, int subAmount = 1)
         {
-            ItemType item = GetItemFromDatabase(categoryID, itemID);
+            Item item = GetItemFromDatabase(categoryID, itemID);
             ItemSlot currSlot = GetLastSlotWithItem(categoryID, itemID);
 
             int amountLeftToSub = subAmount;
@@ -214,29 +215,31 @@ namespace ModdableInventory
 
         private void AddNewItemSlot(ref ItemSlot currSlot, int categoryID, int itemID, int itemAmount)
         {
-            ItemType item = GetItemFromDatabase(categoryID, itemID);
+            Item item = GetItemFromDatabase(categoryID, itemID);
 
-            inventoryItems[categoryID].ItemSlots.Add(currSlot = new ItemSlot(item, Mathf.Min(itemAmount, item.StackLimit)));
+            inventoryItems[categoryID].AddItemSlot(currSlot = new ItemSlot(item, Mathf.Min(itemAmount, item.StackLimit)));
             currentWeight += currSlot.Weight;
         }
 
         private void UpdateItemSlot(ItemSlot currSlot, int newAmount)
         {
             currentWeight -= currSlot.Weight;
-            currSlot.SetAmount(newAmount);
+            currSlot.Amount = newAmount;
             currentWeight += currSlot.Weight;
         }
 
         private void RemoveItemSlot(ItemSlot currSlot, int categoryID)
         {
             currentWeight -= currSlot.Weight;
-            inventoryItems[categoryID].ItemSlots.Remove(currSlot);
+            inventoryItems[categoryID].RemoveItemSlot(currSlot);
         }
 
-        // this makes it so that items are added/removed from the last slot first.
+        /// <remarks>
+        /// (this makes it so that items are added/removed from the last slot first)
+        /// </remarks>
         private ItemSlot GetLastSlotWithItem(int categoryID, int itemID)
         {
-            ItemType item = GetItemFromDatabase(categoryID, itemID);
+            Item item = GetItemFromDatabase(categoryID, itemID);
 
             for (int i = inventoryItems[categoryID].ItemSlots.Count - 1; i >= 0; i--)
             {
@@ -251,7 +254,7 @@ namespace ModdableInventory
             return null;
         }
 
-        private ItemType GetItemFromDatabase(int categoryID, int itemID)
+        private Item GetItemFromDatabase(int categoryID, int itemID)
         {
             return database.ItemCategories[categoryID].ItemSlots[itemID].Item;
         }
@@ -274,15 +277,15 @@ namespace ModdableInventory
             return (false, -1, -1);
         }
 
-        private (bool itemFound, int categoryID, int itemID) SearchItemInDatabaseByID (UniqueStringID uniqueIDToSearch)
+        private (bool itemFound, int categoryID, int itemID) SearchItemInDatabaseByID (string itemStringID)
         {
             for (int i = 0; i < database.ItemCategories.Count; i++)
             {
                 for (int j = 0; j < database.ItemCategories[i].ItemSlots.Count; j++)
                 {
-                    string currItemID = database.ItemCategories[i].ItemSlots[j].Item.UniqueID.StringID;
+                    string currItemID = database.ItemCategories[i].ItemSlots[j].Item.ItemStringID;
 
-                    if (StringUtils.StringContainsName(currItemID, uniqueIDToSearch.StringID))
+                    if (StringUtils.StringContainsName(currItemID, itemStringID))
                     {
                         return (true, i, j);
                     }

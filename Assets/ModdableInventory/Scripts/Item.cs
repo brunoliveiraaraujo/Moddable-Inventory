@@ -7,40 +7,40 @@ using ModdableInventory.Utils;
 
 namespace ModdableInventory
 {
-    public abstract class ItemType
+    /// <summary>
+    /// An abstract item, on which items of different types can be derived from.
+    /// </summary>
+    public abstract class Item
     {
         private const string SPRITES_FOLDER_PATH = "gamedata/sprites/items/";
 
-        private Dictionary<string, string> itemData;
-
-        public UniqueStringID UniqueID { get; private set; }
+        public string ItemStringID { get; private set; }
+        /// <summary>
+        /// Data parsed from an YAML file, which will define the item's properties.
+        /// </summary>
+        public Dictionary<string, string> ItemData { get; private set; }
         public string Name { get; private set; }
         public int Cost { get; private set; }
         public float Weight { get; private set; }
+        /// <summary>
+        /// How many of this item can be stacked into a single ItemSlot.
+        /// </summary>
         public int StackLimit { get; private set; }
+        /// <summary>
+        /// Can this item be stacked into multiple ItemSlots?
+        /// </summary>
         public bool MultiStack { get; private set; }
 
         public string SpritePath { get; private set; }
         public Sprite Sprite { get; private set; }
 
-        public Dictionary<string, string> ItemData 
-        { 
-            get => itemData; private set => itemData = value; 
-        }
-
-        public void Initialize(UniqueStringID stringID, Dictionary<string, string> itemData)
+        public void Initialize(string itemStringID, Dictionary<string, string> itemData)
         {
-            this.UniqueID = stringID;
-            this.ItemData = itemData;
+            ItemStringID = itemStringID;
+            ItemData = itemData;
 
             LoadProperties();
-
             Sprite = LoadSprite();
-
-            if (Cost < 0) 
-                throw new ArgumentOutOfRangeException($"cost of \"{Name}\"", "cannot be negative");
-            if (StackLimit < 0) 
-                throw new ArgumentOutOfRangeException($"stackLimit of \"{Name}\"", "cannot be negative");
         }
 
         public virtual string PropertiesToString(int decimalPlaces = 2)
@@ -53,7 +53,12 @@ namespace ModdableInventory
             return text;
         }
 
-        // Textures must be read/write enabled in the inspector to be able to extract
+        /// <summary>
+        /// Extracts the Sprite of this Item to a subfolder in the game's install location.
+        /// </summary>
+        /// <remarks>
+        /// (textures must be read/write enabled in the inspector to be able to extract)
+        /// </remarks>
         public void ExtractItemSprite()
         {
             if (!EditorUtils.IsUnityEditor())
@@ -67,15 +72,20 @@ namespace ModdableInventory
 
         protected virtual void LoadProperties()
         {
-            Name = SetProperty("name", "generic_item");
+            Name = SetStringProperty("name", "generic_item");
             Cost = SetProperty<int>("cost", 0);
             Weight = SetProperty<float>("weight", 0);
             StackLimit = SetProperty<int>("stackLimit", 99);
             MultiStack = SetProperty<bool>("multiStack", true);
-            SpritePath = SetProperty("spritePath", UniqueID.StringID + ".png");
+            SpritePath = SetStringProperty("spritePath", ItemStringID + ".png");
+
+            if (Cost < 0) 
+                throw new ArgumentOutOfRangeException($"cost of \"{Name}\"", "cannot be negative");
+            if (StackLimit < 0) 
+                throw new ArgumentOutOfRangeException($"stackLimit of \"{Name}\"", "cannot be negative");
         }
 
-        protected string SetProperty(string key, string defaultValue)
+        protected string SetStringProperty(string key, string defaultValue)
         {
             string property;
 
@@ -125,7 +135,7 @@ namespace ModdableInventory
             if (sprite == null)
                 sprite = LoadInternalSprite(SPRITES_FOLDER_PATH, Path.ChangeExtension(SpritePath, null));
             if (sprite == null)
-                sprite = LoadInternalSprite(SPRITES_FOLDER_PATH, UniqueID.StringID);
+                sprite = LoadInternalSprite(SPRITES_FOLDER_PATH, ItemStringID);
             if (sprite == null) 
                 sprite = LoadInternalSprite(SPRITES_FOLDER_PATH, "generic_item");
             if (sprite == null)
@@ -136,12 +146,12 @@ namespace ModdableInventory
 
         private Sprite LoadExternalSprite(string folderPath, string spritePath)
         {
-            if (!EditorUtils.IsUnityEditor())
+            if (EditorUtils.IsUnityEditor())
             {
-                Directory.CreateDirectory(Path.GetDirectoryName(folderPath)); 
+                return null;
             }
 
-            Sprite sprite = null;
+            Directory.CreateDirectory(Path.GetDirectoryName(folderPath)); 
 
             byte[] byteArray = File.ReadAllBytes(folderPath + spritePath);
             Texture2D texture = new Texture2D(1, 1);
@@ -150,7 +160,7 @@ namespace ModdableInventory
             texture.filterMode = FilterMode.Point;
             texture.wrapMode = TextureWrapMode.Clamp;
 
-            sprite = Sprite.Create(
+            Sprite sprite = Sprite.Create(
                 texture,
                 new Rect(0, 0, texture.width, texture.height), 
                 new Vector2(.5f, .5f), 100);

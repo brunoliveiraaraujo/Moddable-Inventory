@@ -4,7 +4,6 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using ModdableInventory;
 
-// TODO: make EquipmentSlotButtons's GameObjects Instantiate according to the EquipmentSlots defined in ModdableInventory.Equipment through equipment.yaml
 public class EquipmentSlotButton : AbstractSlotButton
 {
     private int equipSlotID = -1;
@@ -20,7 +19,17 @@ public class EquipmentSlotButton : AbstractSlotButton
         if (itemStringID != null)
         {
             uiManager.UnequipItem(itemStringID, equipSlotID);
-            uiManager.HideItemTooltip();
+            
+            itemStringID = null;
+            OnPointerEnter(eventData);
         }
+    }
+
+    public override void OnPointerEnter(PointerEventData eventData)
+    {
+        if (itemStringID == null)
+            uiManager.ShowEquipSlotTooltip(transform.position, equipSlotID);
+        else
+            base.OnPointerEnter(eventData);
     }
 }

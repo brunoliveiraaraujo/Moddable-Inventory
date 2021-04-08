@@ -11,7 +11,8 @@ extractSpriteData: false
 ## Item Categories ##
 # Entries in item categories use the following format:
 # <ItemType>:
-#   categoryName:<string> # the in-game name of this item category>
+#   categoryName: {string}                # the in-game name of this item category
+#   showCategoryTab: {int, default=true}  # should a new UI tab be used for this category
 #   items:
 #     <itemStringID>:     # unique identifier for this item  
 #       <key>:<value>     # parameters used for a item of this type
@@ -56,6 +57,12 @@ Armor:
       cost: 30
       defense: 1
       weight: 4.2
+HeavyArmor: # derived from Armor
+  categoryName: "Heavy Armors"
+  showCategoryTab: false # do not need a new Tab for Heavy Armors, uses Armor tab instead
+  items:
+    harmor00:
+      name: "Iron Armor"
 ## Key Items ##
 KeyItem:
   categoryName: "Key Items"

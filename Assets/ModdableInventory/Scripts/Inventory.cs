@@ -62,7 +62,10 @@ namespace ModdableInventory
 
             for (int i = 0; i < database.ItemCategories.Count; i++)
             {
-                inventoryItems.Add(new ItemCategory(database.ItemCategories[i].CategoryName, database.ItemCategories[i].ItemType));
+                inventoryItems.Add(new ItemCategory(
+                    database.ItemCategories[i].CategoryName,
+                    database.ItemCategories[i].ShowCategoryTab, 
+                    database.ItemCategories[i].ItemType));
             }
 
             InventoryInitialized?.Invoke(this, EventArgs.Empty);

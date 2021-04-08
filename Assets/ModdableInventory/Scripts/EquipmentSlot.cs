@@ -11,7 +11,7 @@ namespace ModdableInventory
     {
         private Item item = null;
 
-        public EquipmentSlot(string slotName, Type itemType)
+        public EquipmentSlot(string slotName, Type itemType, Vector2 deltaPos)
         {
             if (!ClassUtils.IsSameOrSubclass(typeof(Item), itemType))
                 throw new InvalidCastException("itemType is not a type of Item");
@@ -19,6 +19,7 @@ namespace ModdableInventory
             SlotName = slotName;
             ItemType = itemType;
             Item = null;
+            DeltaPos = deltaPos;
         }
 
         public string SlotName { get; }
@@ -39,6 +40,7 @@ namespace ModdableInventory
                 item = value;
             } 
         }
+        public Vector2 DeltaPos { get; }
     }
 }
 

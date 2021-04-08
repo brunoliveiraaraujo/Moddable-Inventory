@@ -66,27 +66,34 @@ namespace ModdableInventory
                 }
                 else
                 {
-                    ParseItemCategories(categoryNode, categoryID);
+                    ParseItemCategory(categoryNode, categoryID);
                     categoryID++;
                 }
             }
         }
 
-        private void ParseItemCategories(KeyValuePair<YamlNode, YamlNode> categoryNode, int categoryID)
+        private void ParseItemCategory(KeyValuePair<YamlNode, YamlNode> categoryNode, int categoryID)
         {
             string typeName = categoryNode.Key.ToString();
             Type itemType = Type.GetType(GlobalConstants.ITEMS_NAMESPACE + "." + typeName, true);
+
+            string categoryName = null;
+            bool showCategoryTab = true;
 
             foreach (var entry in ((YamlMappingNode)categoryNode.Value).Children)
             {
                 if (entry.Key.ToString().Equals("categoryName"))
                 {
-                    string categoryName = entry.Value.ToString();
-
-                    itemCategories.Add(new ItemCategory(categoryName, itemType));
+                    categoryName = entry.Value.ToString();
+                }
+                else if (entry.Key.ToString().Equals("showCategoryTab"))
+                {
+                    showCategoryTab = bool.Parse(entry.Value.ToString());
                 }
                 else if (entry.Key.ToString().Equals("items"))
                 {
+                    itemCategories.Add(new ItemCategory(categoryName, showCategoryTab, itemType));
+
                     foreach (var itemNode in ((YamlMappingNode)entry.Value).Children)
                     {
                         ParseItem(itemNode, (Item) Activator.CreateInstance(itemType), categoryID);

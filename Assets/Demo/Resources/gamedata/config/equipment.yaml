@@ -7,13 +7,20 @@
 # itemType: {string}
   # what <ItemClass> can be equipped in this slot (see itemDatabase.yaml)
   # use "Item" for the slot to work with any item (since it's the base class for all items)
+# deltaX: {float, default: 0} (optional)
+  # the horizontal position of this equipment slot in the UI, in relation to it's parent
+# deltaY: {float, default: 0} (optional)
+  # the vertical position of this equipment slot in the UI, in relation to it's parent
 equipmentSlots:
   Torso:
     name: "Torso"
     itemType: Armor
+    deltaY: 120
   LeftHand:
     name: "Left Hand"
     itemType: Weapon
+    deltaX: -155
   RightHand:
     name: "Right Hand"
     itemType: Weapon
+    deltaX: 155

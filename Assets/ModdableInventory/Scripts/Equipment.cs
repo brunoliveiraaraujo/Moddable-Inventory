@@ -7,6 +7,7 @@ using System.Text;
 using ModdableInventory.Utils;
 using UnityEngine;
 using YamlDotNet.RepresentationModel;
+using System.Globalization;
 
 namespace ModdableInventory
 {
@@ -18,9 +19,9 @@ namespace ModdableInventory
 
         private ItemDatabase database;
         private Inventory inventory;
-        private List<EquipmentSlot> equippedItems = new List<EquipmentSlot>();
+        private List<EquipmentSlot> equipSlots = new List<EquipmentSlot>();
 
-        public ReadOnlyCollection<EquipmentSlot> EquippedItems => equippedItems.AsReadOnly();
+        public ReadOnlyCollection<EquipmentSlot> EquipSlots => equipSlots.AsReadOnly();
 
         public event EventHandler EquipmentInitialized;
 
@@ -73,6 +74,7 @@ namespace ModdableInventory
             {
                 string slotName = null;
                 string typeName = null;
+                Vector2 deltaPos = Vector2.zero;
 
                 foreach (var parameter in ((YamlMappingNode)slot.Value).Children)
                 {
@@ -87,9 +89,21 @@ namespace ModdableInventory
                     {
                         typeName = valueName;
                     }
+                    else if (keyName.Equals("deltaX"))
+                    {
+                        deltaPos.x = float.Parse(valueName, CultureInfo.InvariantCulture);
+                    }
+                    else if (keyName.Equals("deltaY"))
+                    {
+                        deltaPos.y = float.Parse(valueName, CultureInfo.InvariantCulture);
+                    }
                 }
 
-                equippedItems.Add(new EquipmentSlot(slotName, Type.GetType(GlobalConstants.ITEMS_NAMESPACE + "." + typeName, true)));
+                equipSlots.Add(new EquipmentSlot(
+                    slotName, 
+                    Type.GetType(GlobalConstants.ITEMS_NAMESPACE + "." + typeName, true), 
+                    deltaPos
+                ));
             }
         }
 
@@ -99,7 +113,7 @@ namespace ModdableInventory
 
             if (item != null)
             {
-                foreach (var slot in equippedItems)
+                foreach (var slot in equipSlots)
                 {
                     bool equipped = EquipItemInSlot(item, slot);
                     if (equipped) return;
@@ -115,7 +129,7 @@ namespace ModdableInventory
             {
                 if (slotID < 0)
                 {
-                    foreach (var slot in equippedItems)
+                    foreach (var slot in equipSlots)
                     {
                         bool unequipped = UnequipItemInSlot(item, slot);
                         if (unequipped) return;
@@ -123,7 +137,7 @@ namespace ModdableInventory
                 }
                 else
                 {
-                    UnequipItemInSlot(item, equippedItems[slotID], true);
+                    UnequipItemInSlot(item, equipSlots[slotID], true);
                 }
             }
         }
@@ -168,7 +182,7 @@ namespace ModdableInventory
 
         private Item GetItemFromEquippedByStringID(string itemStringID)
         {
-            foreach (var slot in equippedItems)
+            foreach (var slot in equipSlots)
             {
                 if (slot.Item != null)
                 {

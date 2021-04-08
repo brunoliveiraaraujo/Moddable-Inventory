@@ -3,11 +3,20 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using ModdableInventory;
+using System;
 
 public abstract class AbstractSlotButton : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 {
-    [SerializeField] protected InventoryUIManager uiManager;
+    protected InventoryUIManager uiManager = null;
     protected string itemStringID = null;
+
+    private bool initialized = false;
+
+    public void Initialize(InventoryUIManager uiManager)
+    {
+        if (!initialized) this.uiManager = uiManager;
+        initialized = true;
+    }
 
     public void SetData(string itemStringID)
     {
@@ -16,7 +25,7 @@ public abstract class AbstractSlotButton : MonoBehaviour, IPointerClickHandler, 
 
     public abstract void OnPointerClick(PointerEventData eventData);
 
-    public void OnPointerEnter(PointerEventData eventData)
+    public virtual void OnPointerEnter(PointerEventData eventData)
     {
         uiManager.ShowItemTooltip(transform.position, itemStringID);
     }

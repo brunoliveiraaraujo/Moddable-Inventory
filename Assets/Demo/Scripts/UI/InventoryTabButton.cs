@@ -10,6 +10,12 @@ public class InventoryTabButton : MonoBehaviour, IPointerEnterHandler, IPointerE
     private InventoryTabGroup tabGroup;
 
     public Image Background { get; private set; }
+    public int CategoryID { get; private set; } = -1;
+
+    public void Initialize(int categoryID)
+    {
+        CategoryID = categoryID;
+    }
 
     private void Awake() 
     {

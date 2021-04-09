@@ -18,8 +18,9 @@ public class InventoryUIManager : MonoBehaviour
     private const float ITEM_GRID_LINE_HEIGHT = 140;
 
     [Tooltip("The maximum number of stacks of each item the player starts with in this demo.")]
-    [Min(0)] [SerializeField] private int startingStacksInDemo = 2;
+    [Range(0, 9)] [SerializeField] private int startingStacksInDemo = 2;
 
+    [SerializeField] private InventoryTabGroup inventoryTabGroup;
     [SerializeField] private Transform inventoryGridUI;
     [SerializeField] private Transform equipmentSlotsUI;
     [SerializeField] private Transform itemTooltip;
@@ -35,7 +36,7 @@ public class InventoryUIManager : MonoBehaviour
     TextMeshProUGUI tooltipHeader;
     TextMeshProUGUI tooltipBody;
 
-    private int currentPageID = 0;
+    private int currentTabID = 0;
 
     private void Awake() 
     {
@@ -104,25 +105,25 @@ public class InventoryUIManager : MonoBehaviour
             itemBtn.Initialize(this);
         }
 
-        DisplayItemPage(currentPageID);
+        DisplayItemPage(currentTabID);
     }
 
-    public void DisplayItemPage(int pageID)
+    public void DisplayItemPage(int tabID)
     {
-        currentPageID = pageID;
+        currentTabID = tabID;
 
         ClearInventoryDisplay();
         UpdateUIText();
 
-        int categoryID = pageID - 1;
+        // int categoryID = pageID - 1;
 
-        if (categoryID < 0)
+        if (tabID <= 0)
         {
             DisplayAllItems();
         }
         else
         {
-            DisplayItemCategory(categoryID);
+            DisplayItemCategory(inventoryTabGroup.TabButtons[tabID].CategoryID);
         }
     }
 
@@ -130,14 +131,14 @@ public class InventoryUIManager : MonoBehaviour
     {
         equipment.EquipItem(itemStringID);
         DisplayEquipment();
-        DisplayItemPage(currentPageID);
+        DisplayItemPage(currentTabID);
     }
 
     public void UnequipItem(string itemStringID, int equipSlotID)
     {
         equipment.UnequipItem(itemStringID, equipSlotID);
         DisplayEquipment();
-        DisplayItemPage(currentPageID);
+        DisplayItemPage(currentTabID);
     }
 
     public void ShowItemTooltip(Vector3 pos, string itemStringID)
@@ -210,14 +211,29 @@ public class InventoryUIManager : MonoBehaviour
 
     private void DisplayItemCategory (int categoryID, int imageSlotOffset = 0, bool forceDisplay = false)
     {
+        // display derived categories in the same tab as the parent category, if they don't have a tab for themselves
+        int parentCategoryItemCount = inventory.InventoryItems[categoryID].ItemSlots.Count;
+        int previousCategoryItemCount = parentCategoryItemCount;
+        for (int i = 0; i < inventory.InventoryItems.Count; i++)
+        {
+            ItemCategory category = (ItemCategory)inventory.InventoryItems[i];
+            bool isChildOfThis = category.ItemType.IsSubclassOf(inventory.InventoryItems[categoryID].ItemType);
+
+            if (isChildOfThis && !category.ShowCategoryTab)
+            {
+                DisplayItemCategory(
+                    i, 
+                    imageSlotOffset + previousCategoryItemCount, 
+                    true);
+
+                previousCategoryItemCount += inventory.InventoryItems[i].ItemSlots.Count;
+            }
+        }
+
         // skip category where ShowCategoryTab is false (since there is no tab for it)
         // except when showing all items, or inside a parent tab (forceDisplay=true)
         if (!inventory.InventoryItems[categoryID].ShowCategoryTab && !forceDisplay)
         {
-            if (categoryID + 1 < inventory.InventoryItems.Count)
-            {
-                DisplayItemCategory(categoryID + 1, imageSlotOffset);
-            }
             return;
         }
 
@@ -238,21 +254,6 @@ public class InventoryUIManager : MonoBehaviour
                 itemImageObj.GetComponent<InventoryGridSlotButton>(), 
                 itemSlot    
             );
-        }
-
-        // display derived categories in the same tab as the parent category, if they don't have a tab for themselves
-        for (int i = 0; i < inventory.InventoryItems.Count; i++)
-        {
-            ItemCategory category = (ItemCategory)inventory.InventoryItems[i];
-            bool isDerived = category.ItemType.IsSubclassOf(inventory.InventoryItems[categoryID].ItemType);
-
-            if (isDerived && !category.ShowCategoryTab)
-            {
-                DisplayItemCategory(
-                    i, 
-                    imageSlotOffset + inventory.InventoryItems[categoryID].ItemSlots.Count, 
-                    true);
-            }
         }
     }
 

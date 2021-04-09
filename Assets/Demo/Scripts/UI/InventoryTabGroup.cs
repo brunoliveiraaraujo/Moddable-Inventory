@@ -4,6 +4,7 @@ using UnityEngine;
 using ModdableInventory;
 using System;
 using TMPro;
+using System.Collections.ObjectModel;
 
 public class InventoryTabGroup : MonoBehaviour
 {
@@ -17,6 +18,8 @@ public class InventoryTabGroup : MonoBehaviour
     private InventoryTabButton selectedTabButton;
     private int selectedTabID;
     private List<InventoryTabButton> tabButtons = new List<InventoryTabButton>();
+
+    public ReadOnlyCollection<InventoryTabButton> TabButtons => tabButtons.AsReadOnly();
 
     private void Awake() 
     {
@@ -32,14 +35,16 @@ public class InventoryTabGroup : MonoBehaviour
     private void InitializeAllTabs()
     {
         GameObject tabObj = GameObject.Instantiate(tabButtonPrefab, transform);
-        InitializeTab(tabObj, "all items");
+        InitializeTab(tabObj, "all items", -1);
 
-        foreach (var category in database.ItemCategories)
+        for (int i = 0; i < database.ItemCategories.Count; i++)
         {
+            ItemCategory category = database.ItemCategories[i];
+            
             if (category.ShowCategoryTab)
             {
                 tabObj = GameObject.Instantiate(tabButtonPrefab, transform);
-                InitializeTab(tabObj, category.CategoryName);
+                InitializeTab(tabObj, category.CategoryName, i);
             }
         }
 
@@ -53,15 +58,17 @@ public class InventoryTabGroup : MonoBehaviour
         OnTabSelected(selectedTabButton);
     }
 
-    private void InitializeTab(GameObject tabObj, string text)
+    private void InitializeTab(GameObject tabObj, string text, int categoryID)
     {
         InventoryTabButton tabButton = tabObj.GetComponent<InventoryTabButton>();
+        tabButton.Initialize(categoryID);
+
         tabButtons.Add(tabButton);
 
         tabObj.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = text.ToLower();
     }
 
-        public void OnTabEnter(InventoryTabButton tab)
+    public void OnTabEnter(InventoryTabButton tab)
     {
         ResetTabs();
         if (selectedTabButton != null && tab == selectedTabButton) return;

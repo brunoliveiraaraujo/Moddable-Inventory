@@ -30,48 +30,267 @@ extractSpriteData: false
   # path to the item's sprite, relative to "<game_folder>/gamedata/sprites/items/"
   # supported sprite formats are: .bmp, .exr, .gif, .hdr, .iff, .jpg, .pict, .png, .psd, .tga and .tiff
 
+## Consumables ##
+Consumable:
+  categoryName: "Consumables"
+  items:
+    potionCyan:
+      name: "Unknown Cyan Potion"
+      cost: 100
+      weight: 0.35
+    potionGreen:
+      name: "Unknown Green Potion"
+      cost: 100
+      weight: 0.35
+    potionPurple:
+      name: "Unknown Purple Potion"
+      cost: 100
+      weight: 0.35
+    potionRed:
+      name: "Unknown Red Potion"
+      cost: 100
+      weight: 0.35
+    potionYellow:
+      name: "Unknown Yellow Potion"
+      cost: 100
+      weight: 0.35
+    scroll:
+      name: "Scroll of Burning Flame"
+      cost: 500
+      weight: 0.1
+    scroll2:
+      name: "Scroll of Icy Frost"
+      cost: 500
+      weight: 0.1
+
 ## Weapons ##
-# Parameters used in Weapons:
+# parameters used in Weapons:
 # attack: {int, default=0} # this weapon's attack value
 Weapon:
   categoryName: "Weapons"
   items:
-    sword00:
-      name: "Short Sword"
-      cost: 50
-      attack: 3
-      weight: 3.5
-    sword01:
-      name: "Magic Sword"
-      cost: 400
-      attack: 9
-      weight: 5.8
+      axe:
+        name: "Axe"
+        cost: 500
+        weight: 4
+        attack: 4
+      axe2:
+        name: "Axe of Freezing"
+        cost: 10000
+        weight: 4
+        attack: 6
+      axe3:
+        name: "Axe of Burning"
+        cost: 12000
+        weight: 4
+        attack: 7
+      dagger:
+        name: "Dagger"
+        cost: 300
+        weight: 1
+        attack: 2
+      dagger2:
+        name: "Dagger of Freezing"
+        cost: 6500
+        weight: 1
+        attack: 4
+      dagger3:
+        name: "Dagger of Burning"
+        cost: 7000
+        weight: 1
+        attack: 5
+      sword:
+        name: "Sword"
+        cost: 700
+        weight: 3.5
+        attack: 4
+      sword2:
+        name: "Sword of Freezing"
+        cost: 14000
+        weight: 3.5
+        attack: 6
+      sword3:
+        name: "Sword of Burning"
+        cost: 16000
+        weight: 3.5
+        attack: 7
+## Ranged Weapons ##
+# derived from Weapons
+# parameters used in Ranged Weapons:
+# range: {int, default=0} # this weapon's maximum attack range
+WeaponRanged:
+  categoryName: "Ranged Weapons"
+  showCategoryTab: false
+  items:
+    bow:
+      name: "Bow"
+      cost: 1000
+      weight: 1.5
+      attack: 2
+      range: 4
+
 ## Armors ##
-# Parameters used in Armors:
+# parameters used in Armors:
 # defense: {int, default=0} # this armor's defense value
 Armor:
   categoryName: "Armors"
+
+## Torso Armors ##
+# derived from Armor
+ArmorTorso:
+  categoryName: "Torso Armors"
+  showCategoryTab: false
   items:
-    armor00:
-      name: "Leather Tunic"
-      cost: 30
+    armor:
+      name: "Heavy Armor"
+      cost: 2000
+      weight: 10
+      defense: 3
+    armor2:
+      name: "Paladin Armor"
+      cost: 8000
+      weight: 10
+      defense: 5
+
+## Feet Armors ##
+# derived from Armor
+ArmorFeet:
+  categoryName: "Feet Armors"
+  showCategoryTab: false
+  items:
+    boots:
+      name: "Heavy Boots"
+      cost: 500
+      weight: 4
       defense: 1
-      weight: 4.2
-HeavyArmor: # derived from Armor
-  categoryName: "Heavy Armors"
-  showCategoryTab: false # do not need a new Tab for Heavy Armors, uses Armor tab instead
+    boots2:
+      name: "Paladin Boots"
+      cost: 2000
+      weight: 4
+      defense: 2
+
+## Hands Armors ##
+# derived from Armor
+ArmorHands:
+  categoryName: "Hands Armors"
+  showCategoryTab: false
   items:
-    harmor00:
-      name: "Iron Armor"
-## Key Items ##
+    gauntlet:
+      name: "Heavy Gauntlets"
+      cost: 500
+      weight: 4
+      defense: 1
+    gauntlet2:
+      name: "Paladin Gauntlets"
+      cost: 2000
+      weight: 4
+      defense: 2
+
+## Shields ##
+# derived from Armor
+ArmorShield:
+  categoryName: "Shields"
+  showCategoryTab: false
+  items:
+    shield:
+      name: "Heavy Shield"
+      cost: 1500
+      weight: 8
+      defense: 3
+    shield2:
+      name: "Paladin Shield"
+      cost: 4500
+      weight: 8
+      defense: 4
+    shield3:
+      name: "Buckler"
+      cost: 600
+      weight: 2
+      defense: 1
+    shield4:
+      name: "Paladin Buckler"
+      cost: 1800
+      weight: 2
+      defense: 2
+
+## Other Items ##
+OtherItem:
+  categoryName: "Others"
+  items:
+    gem:
+      name: "Mystic Gem"
+      cost: 5000
+      weight: 0.2
+    gem2:
+      name: "Thaumic Gem"
+      cost: 10000
+      weight: 0.2
+    torch:
+      name: "Torch"
+      cost: 100
+      weight: 0.5
+
+## Backpacks ##
+# derived from OtherItem
+Backpack:
+  categoryName: "Backpacks"
+  showCategoryTab: false
+  items:
+    backpack:
+      name: "Backpack of Holding"
+      cost: 30000
+      weight: -20
+
+## Rings ##
+# derived from OtherItem
+Ring:
+  categoryName: "Rings"
+  showCategoryTab: false
+  items:
+    ring:
+      name: "Ring of Frost Protection"
+      cost: 5000
+      weight: 0.05
+    ring2:
+      name: "Ring of Burn Protection"
+      cost: 5500
+      weight: 0.05
+
+## Ammo ##
+# derived from OtherItem
+# parameters used in Ammo:
+# weaponName: {string}                # the name of the weapon this ammo is for
+# attackModifier: {int, default = 0}  # the damage added to the weapon's base attack
+Ammo:
+  categoryName: "Ammo"
+  showCategoryTab: false
+  items:
+    arrows:
+      name: "Arrows"
+      weaponName: "Bow"
+      cost: 100
+      weight: 0.1
+      attackModifier: 1
+    arrows2:
+      name: "Arrows of Freezing"
+      weaponName: "Bow"
+      cost: 500
+      weight: 0.1
+      attackModifier: 2
+    arrows3:
+      name: "Arrows of Burning"
+      weaponName: "Bow"
+      cost: 650
+      weight: 0.1
+      attackModifier: 3
+
+# Key Items
+# derived from OtherItem
 KeyItem:
   categoryName: "Key Items"
+  showCategoryTab: false
   items:
-    keyitem00:
+    book:
       name: "Book of Knowledge"
       stackLimit: 1
-      multiStack: false
-    keyitem01:
-      name: "Triangle Piece"
-      stackLimit: 3
       multiStack: false

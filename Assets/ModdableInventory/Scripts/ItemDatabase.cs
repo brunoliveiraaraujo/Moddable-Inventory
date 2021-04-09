@@ -98,8 +98,14 @@ namespace ModdableInventory
                     {
                         ParseItem(itemNode, (Item) Activator.CreateInstance(itemType), categoryID);
                     }
+
+                    // returns a category that has items
+                    return;
                 }
             }
+
+            // return a category that has no items
+            itemCategories.Add(new ItemCategory(categoryName, showCategoryTab, itemType));
         }
 
         private void ParseItem(KeyValuePair<YamlNode, YamlNode> itemNode, Item item, int categoryID)

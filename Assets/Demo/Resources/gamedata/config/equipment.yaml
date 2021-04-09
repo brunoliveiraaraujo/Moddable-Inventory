@@ -12,15 +12,45 @@
 # deltaY: {float, default: 0} (optional)
   # the vertical position of this equipment slot in the UI, in relation to it's parent
 equipmentSlots:
+  Hand1:
+    name: "Hand"
+    itemType: Weapon
+    deltaX: -140
+    deltaY: -70
+  Hand2:
+    name: "Hand"
+    itemType: ArmorShield
+    deltaX: 140
+    deltaY: -70
+  HandsArmor:
+    name: "Hands Armor"
+    itemType: ArmorHands
+    deltaX: -140
+    deltaY: 70
   Torso:
     name: "Torso"
-    itemType: Armor
-    deltaY: 120
-  LeftHand:
-    name: "Left Hand"
-    itemType: Weapon
-    deltaX: -155
-  RightHand:
-    name: "Right Hand"
-    itemType: Weapon
-    deltaX: 155
+    itemType: ArmorTorso
+  Feet:
+    name: "Feet"
+    itemType: ArmorFeet
+    deltaY: -210
+  Backpack:
+    name: "Backpack"
+    itemType: Backpack
+    deltaX: 140
+    deltaY: 70
+  Ammo:
+    name: "Ammo"
+    itemType: Ammo
+    deltaX: -140
+    deltaY: -210
+  Hand1Ring:
+    name: "Ring"
+    itemType: Ring
+    deltaX: -140
+    deltaY: 210
+  Hand2Ring:
+    name: "Ring"
+    itemType: Ring
+    deltaX: 140
+    deltaY: 210

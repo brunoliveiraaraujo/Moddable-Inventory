@@ -1,36 +1,35 @@
 ﻿using UnityEngine;
+using System;
 
 namespace ModdableInventory
 {
+    /// <summary>
+    /// Holds an amount of a specific Item.
+    /// </summary>
     public class ItemSlot
     {
-        private Item item;
-        private int amount;
-
-        public ItemSlot(Item item)
-        {
-            this.item = item;
-            this.amount = 1;
-        }
+        private int amount = 1;
 
         public ItemSlot(Item item, int amount = 1)
         {
-            this.item = item;
-            this.amount = amount;
+            if (item == null)
+                throw new ArgumentNullException("item");
+
+            if (amount <= 0)
+                throw new ArgumentOutOfRangeException("amount", "must be greater than zero");
+
+            Item = item;
+            Amount = amount;
         }
 
-        public Item Item { get => item; }
+        public Item Item { get; }
         public int Amount 
         { 
-            get => Mathf.Clamp(amount, 1, item.StackLimit); 
+            get { return Mathf.Clamp(amount, 1, Item.StackLimit);} 
             set { amount = value; }
         }
-        public float Weight { get => item.Weight * Amount; }
-
-        public bool IsFull()
-        {
-            return Amount == item.StackLimit;
-        }
+        public float Weight => Item.Weight * Amount;
+        public bool IsFull => Amount == Item.StackLimit;
     }
 }
 

@@ -1,0 +1,56 @@
+##### equipment.yaml #####
+## Equipment Settings ##
+# these define the slots in which items can be equipped
+# each slot has the following parameters:
+# name: {string}
+  # the in-game name of the item slot
+# itemType: {string}
+  # what <ItemClass> can be equipped in this slot (see itemDatabase.yaml)
+  # use "Item" for the slot to work with any item (since it's the base class for all items)
+# deltaX: {float, default: 0} (optional)
+  # the horizontal position of this equipment slot in the UI, in relation to it's parent
+# deltaY: {float, default: 0} (optional)
+  # the vertical position of this equipment slot in the UI, in relation to it's parent
+equipmentSlots:
+  Hand1:
+    name: "Hand"
+    itemType: Weapon
+    deltaX: -140
+    deltaY: -70
+  Hand2:
+    name: "Hand"
+    itemType: ArmorShield
+    deltaX: 140
+    deltaY: -70
+  HandsArmor:
+    name: "Hands Armor"
+    itemType: ArmorHands
+    deltaX: -140
+    deltaY: 70
+  Torso:
+    name: "Torso"
+    itemType: ArmorTorso
+  Feet:
+    name: "Feet"
+    itemType: ArmorFeet
+    deltaY: -210
+  Backpack:
+    name: "Backpack"
+    itemType: Backpack
+    deltaX: 140
+    deltaY: 70
+  Ammo:
+    name: "Ammo"
+    itemType: Ammo
+    deltaX: -140
+    deltaY: -210
+  Hand1Ring:
+    name: "Ring"
+    itemType: Ring
+    deltaX: -140
+    deltaY: 210
+  Hand2Ring:
+    name: "Ring"
+    itemType: Ring
+    deltaX: 140
+    deltaY: 210

@@ -12,7 +12,7 @@ public class UIFollowMouse : MonoBehaviour
     private Vector2 screenCenter = new Vector2(Screen.width/2, Screen.height/2);
     private RectTransform rectTransform;
 
-    public Vector3 targetPos = Vector3.zero;
+    [HideInInspector] public Vector3 targetPos = Vector3.zero;
 
     private void Awake() 
     {

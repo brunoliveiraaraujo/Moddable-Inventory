@@ -57,7 +57,7 @@ namespace ModdableInventory
         /// Extracts the Sprite of this Item to a subfolder in the game's install location.
         /// </summary>
         /// <remarks>
-        /// (textures must be read/write enabled in the inspector to be able to extract)
+        /// (textures must be read/write enabled in the inspector, and without any compression to be able to extract)
         /// </remarks>
         public void ExtractItemSprite()
         {

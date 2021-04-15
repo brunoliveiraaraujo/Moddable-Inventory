@@ -1,5 +1,6 @@
 using System.IO;
 using System.Text;
+using UnityEngine;
 
 namespace ModdableInventory.Utils
 {
@@ -9,7 +10,7 @@ namespace ModdableInventory.Utils
         {
             Directory.CreateDirectory(Path.GetDirectoryName(filePath));
 
-            if (!File.Exists(filePath)) // make sure not to overwrite
+            if (!File.Exists(filePath)) // makes sure not to overwrite existing files
             {
                 File.WriteAllBytes(filePath, fileData);
             }
